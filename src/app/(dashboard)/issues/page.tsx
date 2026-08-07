@@ -44,6 +44,31 @@ function IssuesContent() {
   const [selectedSeverity, setSelectedSeverity] = useState("all");
   const [selectedProject, setSelectedProject] = useState(urlProjectId);
 
+  // Load project list once on mount so the selector is populated immediately
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const res = await fetch("/api/projects");
+        const json = await res.json();
+        const raw: unknown[] = Array.isArray(json.data) ? json.data : [];
+        setProjects(
+          raw
+            .filter((p): p is Record<string, unknown> => typeof p === "object" && p !== null)
+            .map((p) => ({
+              id: String(p.id ?? ""),
+              name: String(p.github_repo ?? p.name ?? p.id ?? "Unknown"),
+            }))
+        );
+      } catch {
+        // non-fatal
+      } finally {
+        // only clear initial loading spinner once projects are known
+        setLoading(false);
+      }
+    }
+    void loadProjects();
+  }, []);
+
   // Sync URL param → selector (e.g. navigating from a project page link)
   useEffect(() => {
     setSelectedProject(urlProjectId);
@@ -53,13 +78,21 @@ function IssuesContent() {
   const [activeIssue, setActiveIssue] = useState<IssueItem | null>(null);
 
   useEffect(() => {
+    // Don't fetch anything until the user has selected a specific project
+    if (selectedProject === "all") {
+      setIssues([]);
+      setFixes([]);
+      setLoading(false);
+      return;
+    }
+
     async function loadIssues() {
       try {
         setLoading(true);
         const params = new URLSearchParams();
         if (search) params.set("search", search);
         if (selectedSeverity !== "all") params.set("severity", selectedSeverity);
-        if (selectedProject !== "all") params.set("projectId", selectedProject);
+        params.set("projectId", selectedProject);
 
         const res = await fetch(`/api/issues?${params.toString()}`);
         const json = await res.json();
@@ -146,6 +179,11 @@ function IssuesContent() {
           <Skeleton height={140} />
           <Skeleton height={140} />
         </div>
+      ) : selectedProject === "all" ? (
+        <Card className={styles.emptyState}>
+          <h3>Select a project</h3>
+          <p>Choose a repository from the dropdown above to view its accessibility issues.</p>
+        </Card>
       ) : issues.length > 0 ? (
         <div className={styles.issuesGrid}>
           {issues.map((issue) => {

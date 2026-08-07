@@ -57,13 +57,20 @@ function GovernanceContent() {
 
   /* Load governance records whenever filters change */
   useEffect(() => {
+    // Don't fetch anything until the user has selected a specific project
+    if (selectedProject === "all") {
+      setRecords([]);
+      setLoading(false);
+      return;
+    }
+
     async function loadRecords() {
       try {
         setLoading(true);
         const params = new URLSearchParams();
         if (search) params.set("search", search);
         if (agentFilter !== "all") params.set("agent", agentFilter);
-        if (selectedProject !== "all") params.set("projectId", selectedProject);
+        params.set("projectId", selectedProject);
 
         const res = await fetch(`/api/governance?${params.toString()}`);
         const json = await res.json();
@@ -155,6 +162,11 @@ function GovernanceContent() {
           <Skeleton height={120} />
           <Skeleton height={120} />
         </div>
+      ) : selectedProject === "all" ? (
+        <Card className={styles.emptyState}>
+          <h3>Select a project</h3>
+          <p>Choose a repository from the dropdown above to view its governance audit trail.</p>
+        </Card>
       ) : records.length > 0 ? (
         viewMode === "cards" ? (
           <div className={styles.grid}>
@@ -175,9 +187,9 @@ function GovernanceContent() {
         <Card className={styles.emptyState}>
           <h3>No Governance Records</h3>
           <p>
-            {search || agentFilter !== "all" || selectedProject !== "all"
+            {search || agentFilter !== "all"
               ? "No records match your current filter criteria."
-              : "Run an AccessDiff pipeline to generate AI governance audit logs."}
+              : "Run an AccessDiff pipeline on this project to generate AI governance audit logs."}
           </p>
         </Card>
       )}
