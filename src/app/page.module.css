@@ -55,10 +55,18 @@
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  border: 3px solid var(--color-border-default);
+  border: 2px solid var(--color-border-default);
   box-shadow: 2px 2px 0 0 var(--color-border-default);
   padding: 2px;
   background: #fff;
+  flex-shrink: 0;
+}
+
+.brandMark img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: block;
 }
 
 .brandText {

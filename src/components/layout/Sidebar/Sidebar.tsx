@@ -129,7 +129,7 @@ export default function Sidebar({ user }: SidebarProps): ReactNode {
       <div>
         <div className={styles.header}>
           <Link href="/dashboard" className={styles.logo}>
-            <span className={styles.logoIcon}>A</span>
+            <img src="/logo.png" alt="AccessDiff" width={28} height={28} />
             {!isCollapsed && (
               <span className={styles.logoText}>
                 Access<span className={styles.logoAccent}>Diff</span>

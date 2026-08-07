@@ -96,7 +96,7 @@ export const metadata: Metadata = {
     creator: "@accessdiff",
     images: ["/og-image.png"],
   },
-  icons: { icon: "/favicon.ico", shortcut: "/favicon.ico" },
+  icons: { icon: "/logo.png", shortcut: "/logo.png" },
 };
 
 export const viewport: Viewport = {

@@ -14,30 +14,14 @@ export default async function LandingPage() {
         {/* ═══════════════════ Hero ═══════════════════ */}
         <header className={styles.nav}>
           <div className={styles.navInner}>
-            <Link href="/" className={styles.brand} aria-label="AccessDiff home">
-              <span className={styles.brandMark} aria-hidden="true">
-                <svg viewBox="0 0 40 40" width="28" height="28">
-                  <defs>
-                    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="hsl(12, 76%, 58%)" />
-                      <stop offset="100%" stopColor="hsl(176, 52%, 42%)" />
-                    </linearGradient>
-                  </defs>
-                  <rect x="2" y="2" width="36" height="36" rx="9" fill="url(#g1)" />
-                  <path
-                    d="M11 20 L18 27 L29 13"
-                    stroke="white"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <span className={styles.brandText}>
-                Access<span className={styles.brandAccent}>Diff</span>
-              </span>
-            </Link>
+              <Link href="/" className={styles.brand} aria-label="AccessDiff home">
+                <span className={styles.brandMark} aria-hidden="true">
+                  <img src="/logo.png" alt="AccessDiff" width={28} height={28} />
+                </span>
+                <span className={styles.brandText}>
+                  Access<span className={styles.brandAccent}>Diff</span>
+                </span>
+              </Link>
 
             <nav className={styles.navLinks} aria-label="Primary">
               <a href="#features">Features</a>

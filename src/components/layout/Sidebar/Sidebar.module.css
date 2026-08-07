@@ -49,27 +49,11 @@
   text-decoration: none;
 }
 
-.logoIcon {
-  width: 36px;
-  height: 36px;
+.logo img {
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-md);
-  /* Rose-gold premium gradient instead of flat color */
-  background: linear-gradient(135deg,
-    hsl(12, 82%, 64%),
-    hsl(12, 72%, 50%));
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: var(--weight-black);
-  font-size: var(--text-xl);
   flex-shrink: 0;
-  /* Rose-gold halo + gloss highlight */
-  box-shadow:
-    var(--shadow-gloss),
-    0 6px 20px hsla(12, 76%, 58%, 0.30),
-    0 0 0 1px hsla(12, 76%, 58%, 0.18);
-  letter-spacing: -0.04em;
 }
 
 .logoText {
