@@ -65,8 +65,16 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single();
 
-    const token = profile?.github_token || process.env.GITHUB_CLIENT_SECRET;
-    const github = new GitHubClient(token || "");
+    const token = profile?.github_token;
+
+    if (!token) {
+      return NextResponse.json(
+        { data: null, error: { message: "GitHub access token missing. Please sign in again.", code: "NO_GITHUB_TOKEN" } },
+        { status: 401 }
+      );
+    }
+
+    const github = new GitHubClient(token);
 
     // 1. Fetch repo info
     const repoDetails = await github.getRepo(owner, repo);

@@ -31,8 +31,8 @@ export async function GET(
 
     if (!dbUser?.github_token) {
       return NextResponse.json(
-        { data: null, error: { message: "GitHub token missing.", code: "GITHUB_TOKEN_MISSING" } },
-        { status: 400 }
+        { data: null, error: { message: "GitHub token missing. Please sign in again.", code: "GITHUB_TOKEN_MISSING" } },
+        { status: 401 }
       );
     }
 

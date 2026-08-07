@@ -22,12 +22,12 @@ export async function GET() {
     .eq("id", user.id)
     .single();
 
-  const token = profile?.github_token || process.env.GITHUB_CLIENT_SECRET;
+  const token = profile?.github_token;
 
   if (!token) {
     return NextResponse.json(
       { data: null, error: { message: "GitHub access token missing. Please sign in again.", code: "NO_GITHUB_TOKEN" } },
-      { status: 400 }
+      { status: 401 }
     );
   }
 

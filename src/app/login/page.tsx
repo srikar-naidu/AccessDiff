@@ -29,7 +29,7 @@ function LoginContent() {
         provider: "github",
         options: {
           redirectTo: `${origin}/auth/callback`,
-          scopes: "repo user:email",
+          scopes: "read:user user:email repo",
         },
       });
 

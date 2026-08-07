@@ -40,7 +40,7 @@ export async function GET(
     .eq("id", user.id)
     .single();
 
-  const token = profile?.github_token || process.env.GITHUB_CLIENT_SECRET;
+  const token = profile?.github_token;
   let commits: GitHubCommit[] = [];
 
   if (token && project.github_repo) {
