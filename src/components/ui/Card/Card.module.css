@@ -8,13 +8,12 @@
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  /* ★★★ 2px DARK BORDERS (user's explicit req) — bold graphite-pearl frames */
-  border: 2px solid var(--color-border-default);
+  /* ★★★ NEOBRUTALISM: 3px thick borders + hard-offset shadow */
+  border: 3px solid var(--color-border-default);
   border-radius: var(--radius-xl);
   padding: var(--space-6);
-  /* Two-tier premium shadow + top gloss highlight */
   box-shadow:
-    var(--shadow-md),
+    5px 5px 0 0 var(--color-border-default),
     var(--shadow-gloss);
   transition:
     border-color var(--duration-normal) var(--ease-default),
@@ -23,20 +22,19 @@
     background var(--duration-normal) var(--ease-default);
 }
 
-/* ── Interactive (hoverable) — lift + glow border, DARK strong border on hover ── */
+/* ── Interactive (hoverable) — lift + accent-colored neobrutalist shadow ── */
 .interactive:hover {
   border-color: var(--color-border-strong);
   box-shadow:
-    var(--shadow-lg),
-    var(--shadow-gloss),
-    0 0 0 1px hsla(12, 76%, 58%, 0.12);
-  transform: translateY(-2px);
+    8px 8px 0 0 var(--color-accent),
+    var(--shadow-gloss);
+  transform: translate(-3px, -3px);
 }
 
 .interactive:active {
-  transform: translateY(0);
+  transform: translate(0, 0);
   box-shadow:
-    var(--shadow-sm),
+    2px 2px 0 0 var(--color-border-strong),
     var(--shadow-gloss);
 }
 
@@ -49,8 +47,8 @@
   background: var(--glass-bg-strong);
   backdrop-filter: blur(var(--glass-blur-strong));
   -webkit-backdrop-filter: blur(var(--glass-blur-strong));
-  /* 2px DARK borders on glass variant too */
-  border: 2px solid var(--glass-border-strong);
+  /* NEOBRUTALISM: 3px thick dark borders on glass variant too */
+  border: 3px solid var(--glass-border-strong);
 }
 
 /* ── Padding Sizes ── */

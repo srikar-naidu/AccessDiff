@@ -2,14 +2,16 @@
   padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
   background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
+  border: 3px solid var(--color-border-default);
   cursor: pointer;
-  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast), transform var(--duration-fast);
+  box-shadow: 4px 4px 0 0 var(--color-border-default);
 }
 
 .card:hover {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent);
+  box-shadow: 6px 6px 0 0 var(--color-accent);
+  transform: translate(-2px, -2px);
 }
 
 .header {

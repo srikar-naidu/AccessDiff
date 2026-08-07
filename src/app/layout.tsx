@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Instrument_Sans, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -39,16 +39,72 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AccessDiff — AI Accessibility Copilot for GitHub",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://accessdiff.dev"),
+  title: {
+    default: "AccessDiff — AI Accessibility Copilot for GitHub",
+    template: "%s · AccessDiff",
+  },
   description:
-    "AI-powered Accessibility Engineering Platform that performs Accessibility Regression Analysis on GitHub repositories. Detect only newly introduced accessibility issues.",
+    "AI-powered Accessibility Engineering Platform that performs Accessibility Regression Analysis on GitHub repositories. Detect only newly introduced WCAG 2.2 accessibility issues. AI-generated, axe-core verified patches shipped as PRs.",
   keywords: [
     "accessibility",
-    "WCAG",
+    "WCAG 2.2",
     "GitHub",
     "AI",
     "regression analysis",
     "a11y",
+    "axe-core",
+    "web accessibility",
+    "automated a11y testing",
+    "Sarvam AI",
+    "Groq",
+    "Mutagent Helix",
+  ],
+  authors: [{ name: "AccessDiff Labs", url: "https://accessdiff.dev" }],
+  creator: "AccessDiff Labs",
+  publisher: "AccessDiff Labs",
+  applicationName: "AccessDiff",
+  category: "technology",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: process.env.NEXT_PUBLIC_APP_URL ?? "https://accessdiff.dev",
+    siteName: "AccessDiff",
+    title: "AccessDiff — AI Accessibility Copilot for GitHub",
+    description:
+      "Regression-only WCAG 2.2 audits, AI-generated patches, axe-core verification, immutable governance logs, and a Sarvam voice assistant in 11 Indian languages.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "AccessDiff — AI Accessibility Copilot",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AccessDiff — AI Accessibility Copilot for GitHub",
+    description:
+      "Regression-only WCAG 2.2 audits, AI-generated patches, axe-core verification, immutable governance logs, voice assistant in 11 Indian languages.",
+    creator: "@accessdiff",
+    images: ["/og-image.png"],
+  },
+  icons: { icon: "/favicon.ico", shortcut: "/favicon.ico" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "hsl(220, 45%, 97%)" },
+    { media: "(prefers-color-scheme: dark)", color: "hsl(222, 28%, 12%)" },
   ],
 };
 

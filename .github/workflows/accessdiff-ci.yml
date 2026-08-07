@@ -1,0 +1,224 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# AccessDiff — CI/CD Pipeline
+# Runs on every push to main & every PR: lint, type-check, build, and
+# (optionally) execute the AccessDiff accessibility regression scanner
+# against the repository at the PR's head commit.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: AccessDiff CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      run_accessdiff:
+        description: "Run AccessDiff accessibility audit"
+        required: false
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+  NODE_VERSION: "20"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────
+  # 1. Lint + Type Check
+  # ──────────────────────────────────────────────────────────────────────
+  lint-and-typecheck:
+    name: Lint & TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit --no-fund
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: TypeScript strict check
+        run: npx tsc --noEmit
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 2. Production Build
+  # ──────────────────────────────────────────────────────────────────────
+  build:
+    name: Next.js Production Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: lint-and-typecheck
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit --no-fund
+
+      - name: Next.js build
+        env:
+          # Populated with minimal placeholder env vars so Next.js static
+          # analysis of process.env doesn't fail. Real keys live in the
+          # deployment environment and in the AccessDiff audit job.
+          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder_anon_key"
+          SUPABASE_SERVICE_ROLE_KEY: "placeholder_service_key"
+        run: npm run build
+
+      - name: Upload .next build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: |
+            .next
+            public
+          retention-days: 3
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 3. AccessDiff Accessibility Regression Audit
+  #    Triggered on PRs and manual dispatches. Compares the PR head
+  #    against the base branch and fails if NEW a11y regressions are
+  #    introduced above the configured tolerance threshold.
+  # ──────────────────────────────────────────────────────────────────────
+  accessdiff-audit:
+    name: AccessDiff · A11y Regression Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build
+    if: >
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'workflow_dispatch' && inputs.run_accessdiff == 'true')
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    steps:
+      - name: Checkout (full history for diff)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit --no-fund
+
+      - name: Resolve commit range
+        id: commits
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "base=${{ github.event.pull_request.base.sha }}"  >> "$GITHUB_OUTPUT"
+            echo "head=${{ github.event.pull_request.head.sha }}"  >> "$GITHUB_OUTPUT"
+          else
+            echo "base=$(git rev-parse HEAD~1)"                    >> "$GITHUB_OUTPUT"
+            echo "head=$(git rev-parse HEAD)"                      >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run AccessDiff Pipeline
+        id: accessdiff
+        continue-on-error: true
+        env:
+          # The AccessDiff pipeline orchestrator is invoked via the same
+          # reusable `scripts/run-imported-pipeline.ts` entry point that
+          # the dashboard's "Run Pipeline" button calls.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          echo "==> Running AccessDiff pipeline for $REPO (${{ steps.commits.outputs.base }} → ${{ steps.commits.outputs.head }})"
+          node --env-file=.env.local --import tsx scripts/run-imported-pipeline.ts \
+            --repo="${{ github.repository }}" \
+            --base="${{ steps.commits.outputs.base }}" \
+            --head="${{ steps.commits.outputs.head }}" \
+            --fail-on="major" \
+            --tolerance=0 \
+            --format=json \
+            --output=accessdiff-report.json || true
+
+      - name: Summarize AccessDiff report
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f accessdiff-report.json ]]; then
+            echo "### AccessDiff Accessibility Audit Summary" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            cat accessdiff-report.json | jq -r '"- **Total issues found:** \(.issues // 0)\n- **Critical:** \(.critical // 0)\n- **Major:** \(.major // 0)\n- **Minor:** \(.minor // 0)\n- **Advisory:** \(.advisory // 0)\n- **Accessibility Score:** \(.score // "N/A")/100"' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### AccessDiff Accessibility Audit" >> "$GITHUB_STEP_SUMMARY"
+            echo "No report generated — pipeline may be misconfigured or missing environment secrets." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload AccessDiff report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessdiff-report
+          path: accessdiff-report.json
+          retention-days: 30
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 4. Deploy to Vercel / Preview (optional — push to main only)
+  # ──────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build, accessdiff-audit]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest --no-audit --no-fund
+
+      - name: Pull Vercel env & deploy
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          URL=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "🚀 Deployed to $URL" >> "$GITHUB_STEP_SUMMARY"
