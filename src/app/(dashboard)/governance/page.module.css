@@ -59,7 +59,7 @@
   padding: 0.2rem;
   background: var(--color-bg-elevated);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-border-default);
 }
 
 .toggleBtn {
@@ -156,7 +156,7 @@
   padding: 0.6rem 0.75rem;
   background: var(--color-bg-base);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-border-default);
 }
 
 .metaLabel {

@@ -13,9 +13,9 @@
   --color-bg-active:      hsl(220, 30%, 89%);    /* Active/pressed — -10 delta */
 
   /* ── Pearlescent Borders (BOLD DARK graphite-pearl on pearl opal base) ── */
-  --color-border-subtle:  hsl(220, 18%, 72%);    /* Hairline divider — visible pearl-graphite */
-  --color-border-default: hsl(220, 18%, 46%);    /* ★★★ DEFAULT CARD BORDER: bold dark graphite-pearl */
-  --color-border-strong:  hsl(222, 22%, 26%);    /* ★★★ STRONG: ink-dark, for hovered cards & focus ring inner */
+  --color-border-subtle:  hsl(220, 20%, 66%);    /* Hairline divider — visible pearl-graphite */
+  --color-border-default: hsl(220, 22%, 40%);    /* ★★★ DEFAULT CARD BORDER: bold dark graphite-pearl */
+  --color-border-strong:  hsl(222, 26%, 20%);    /* ★★★ STRONG: ink-dark, for hovered cards & focus ring inner */
 
   /* ── Text (ink-black primary, high-readability contrast) ── */
   --color-text-primary:   hsl(222, 47%, 11%);    /* Deep midnight ink — not pure black (#0f172a) */
@@ -60,8 +60,8 @@
   /* ── Frosted Pearl Glass (the aesthetic heart) ── */
   --glass-bg:             hsla(220, 50%, 99%, 0.82);   /* Translucent pearl */
   --glass-bg-strong:      hsla(220, 50%, 99%, 0.93);   /* Heavy glass for modals */
-  --glass-border:         hsla(220, 18%, 46%, 0.65);   /* Bold DARK graphite frame for glass */
-  --glass-border-strong:  hsla(222, 22%, 26%, 0.85);   /* Even darker for elevated glass */
+  --glass-border:         hsla(220, 22%, 40%, 0.72);   /* Bold DARK graphite frame for glass */
+  --glass-border-strong:  hsla(222, 26%, 20%, 0.90);   /* Even darker for elevated glass */
   --glass-blur:           18px;                        /* Heavy blur = frosted glass */
   --glass-blur-strong:    28px;                        /* For sidebars/modals */
 
@@ -131,9 +131,9 @@
   --color-text-primary:   hsl(0, 0%, 0%);
   --color-text-secondary: hsl(0, 0%, 20%);
   --color-text-tertiary:  hsl(0, 0%, 40%);
-  --color-border-subtle:  hsl(0, 0%, 78%);
-  --color-border-default: hsl(0, 0%, 58%);
-  --color-border-strong:  hsl(0, 0%, 30%);
+  --color-border-subtle:  hsl(0, 0%, 70%);
+  --color-border-default: hsl(0, 0%, 50%);
+  --color-border-strong:  hsl(0, 0%, 22%);
   --color-accent:         hsl(12, 90%, 46%);
   --color-accent-hover:   hsl(12, 95%, 38%);
 }
