@@ -121,7 +121,7 @@ export default function ProjectDetailPage({
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+        <div className={styles.actionBar}>
           <Button
             variant="secondary"
             size="lg"

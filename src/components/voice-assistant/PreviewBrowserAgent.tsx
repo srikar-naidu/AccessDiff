@@ -82,7 +82,7 @@ export function PreviewBrowserAgent({ iframe, files, onOpenFile }: PreviewBrowse
         return;
       }
 
-      if (/what (?:all )?(?:buttons|links|controls)|list (?:the )?(?:buttons|links|controls)|what can i (?:click|use)/.test(normalized)) {
+      if (/(?:what|which).*(?:buttons|links|controls).*(?:present|available|there|website|page)|what (?:all )?(?:buttons|links|controls)|list (?:the )?(?:buttons|links|controls)|what can i (?:click|use)/.test(normalized)) {
         sendToPreview(detail.requestId, "controls");
         return;
       }

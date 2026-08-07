@@ -59,6 +59,7 @@ export default function VoiceAssistantOverlay() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<unknown | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const transcriptRef = useRef("");
   const startRecordingRef = useRef<() => void>(() => undefined);
@@ -245,6 +246,10 @@ export default function VoiceAssistantOverlay() {
 
   const toggleRecording = () => {
     if (recording) {
+      if (mediaRecorderRef.current?.state === "recording") {
+        mediaRecorderRef.current.stop();
+        return;
+      }
       if (recognitionRef.current) {
         try {
           (recognitionRef.current as { stop: () => void }).stop();
@@ -257,6 +262,46 @@ export default function VoiceAssistantOverlay() {
     }
 
     if (typeof window === "undefined") return;
+
+    if (navigator.mediaDevices && typeof MediaRecorder !== "undefined") {
+      void navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        const recorder = new MediaRecorder(stream);
+        const chunks: Blob[] = [];
+        mediaRecorderRef.current = recorder;
+
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0) chunks.push(event.data);
+        };
+        recorder.onerror = () => {
+          setRecording(false);
+          stream.getTracks().forEach((track) => track.stop());
+        };
+        recorder.onstop = () => {
+          setRecording(false);
+          stream.getTracks().forEach((track) => track.stop());
+          void transcribeWithSarvam(new Blob(chunks, { type: recorder.mimeType || "audio/webm" }), language)
+            .then((transcript) => {
+              if (!transcript) return;
+              setInput(transcript);
+              void handleSend(transcript);
+            })
+            .catch(() => {
+              setMessages((previous) => [...previous, {
+                id: crypto.randomUUID(), role: "assistant", language: "en-IN",
+                content: "I could not transcribe that recording with Sarvam AI. Please try again.",
+              }]);
+            });
+        };
+        recorder.start();
+        setRecording(true);
+      }).catch(() => {
+        setMessages((previous) => [...previous, {
+          id: crypto.randomUUID(), role: "assistant", language: "en-IN",
+          content: "Microphone access is required for Sarvam voice navigation.",
+        }]);
+      });
+      return;
+    }
 
     const SpeechRecognitionWindow =
       (window as unknown as Record<string, unknown>).SpeechRecognition ||
@@ -501,4 +546,28 @@ export default function VoiceAssistantOverlay() {
       </div>
     </div>
   );
+}
+
+async function transcribeWithSarvam(audio: Blob, language: SarvamLanguage): Promise<string> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Audio conversion failed."));
+    reader.onerror = () => reject(new Error("Audio conversion failed."));
+    reader.readAsDataURL(audio);
+  });
+  const audioBase64 = dataUrl.split(",")[1];
+  if (!audioBase64) throw new Error("Audio conversion failed.");
+  const response = await fetch("/api/voice", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "stt", audioBase64, language }),
+  });
+  const payload: unknown = await response.json();
+  if (!response.ok || !isVoiceResponse(payload)) throw new Error("Sarvam speech-to-text failed.");
+  return payload.data.transcript;
+}
+
+function isVoiceResponse(value: unknown): value is { data: { transcript: string } } {
+  return typeof value === "object" && value !== null
+    && typeof (value as { data?: { transcript?: unknown } }).data?.transcript === "string";
 }

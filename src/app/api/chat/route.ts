@@ -87,26 +87,6 @@ Be concise, practical, and provide code examples when relevant.${contextStr}`;
       }
     }
 
-    // Persist to chat_history
-    await admin.from("chat_history").insert([
-      {
-        user_id: user.id,
-        project_id: body.projectId || null,
-        role: "user",
-        content: body.message,
-        language: lang,
-        context: body.context || null,
-      },
-      {
-        user_id: user.id,
-        project_id: body.projectId || null,
-        role: "assistant",
-        content: finalResponse,
-        language: lang,
-        context: null,
-      },
-    ]);
-
     return NextResponse.json({
       data: { reply: finalResponse, language: lang },
       error: null,
@@ -120,8 +100,8 @@ Be concise, practical, and provide code examples when relevant.${contextStr}`;
   }
 }
 
-/** GET: Fetch chat history */
-export async function GET(request: Request): Promise<NextResponse> {
+/** Voice-assistant sessions are intentionally ephemeral. */
+export async function GET(): Promise<NextResponse> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -134,23 +114,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     );
   }
 
-  const { searchParams } = new URL(request.url);
-  const projectId = searchParams.get("projectId");
-
-  const admin = createAdminClient();
-  let query = admin
-    .from("chat_history")
-    .select("id, role, content, language, created_at")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: true })
-    .limit(100);
-
-  if (projectId) query = query.eq("project_id", projectId);
-
-  const { data: messages } = await query;
-
   return NextResponse.json({
-    data: { messages: messages ?? [] },
+    data: { messages: [] },
     error: null,
   });
 }

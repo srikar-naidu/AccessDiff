@@ -119,6 +119,9 @@
   /* ── Focus Ring (pearl sandwich: ink border → pearl gap → rose) ── */
   --focus-ring:  0 0 0 2px var(--color-bg-base),
                  0 0 0 4px var(--color-accent);
+
+  --color-text-secondary: hsl(220, 17%, 28%);
+  --color-text-tertiary: hsl(220, 12%, 38%);
 }
 
 /* ── High Contrast Mode (preserved semantics, boosted values) ── */
