@@ -142,14 +142,21 @@ async function persistPipelineOutput(run: PipelineRunRecord, output: HelixPipeli
   await persistGovernanceRecords(run, output);
 
   const verification = output.verification;
+  const issueCount = persistedIssues.length;
+  const fixCount = output.fixes.length;
+  const summary = output.error
+    ?? (issueCount === 0
+      ? "No accessibility regressions found in this diff."
+      : `Found ${issueCount} accessibility regression${issueCount === 1 ? "" : "s"}. Generated ${fixCount} fix${fixCount === 1 ? "" : "es"}.`);
+
   await updatePipeline(run.id, {
     status: output.completed ? "completed" : "failed",
     current_stage: output.completed ? "complete" : "failed",
-    total_issues: persistedIssues.length,
-    new_issues: persistedIssues.length,
-    fixes_generated: output.fixes.length,
+    total_issues: issueCount,
+    new_issues: issueCount,
+    fixes_generated: fixCount,
     fixes_verified: verification?.passCount ?? 0,
-    summary: output.error ?? `Found ${persistedIssues.length} accessibility regressions.`,
+    summary,
     error_message: output.error,
     completed_at: new Date().toISOString(),
   });
@@ -229,11 +236,16 @@ function findIssueForFix(issues: PersistedIssue[], fix: HelixPipelineOutput["fix
 }
 
 function toStageInsert(runId: string, stage: HelixStageResult): Record<string, unknown> {
+  const statusMap: Record<HelixStageResult["status"], string> = {
+    COMPLETED: "completed",
+    FAILED: "failed",
+    SKIPPED: "skipped",
+  };
   return {
     pipeline_run_id: runId,
     stage_name: stage.stage.toLowerCase(),
     agent_name: stage.agentName,
-    status: stage.status === "COMPLETED" ? "completed" : "failed",
+    status: statusMap[stage.status],
     output_data: stage.output,
     error_message: stage.status === "FAILED" ? stage.reasoning : null,
     duration_ms: stage.duration_ms,

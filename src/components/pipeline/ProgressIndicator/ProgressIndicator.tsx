@@ -27,12 +27,19 @@ const CANONICAL_STAGES = [
 /**
  * Visual ProgressIndicator displaying ADL pipeline stages with progress bar.
  * Automatically groups raw sub-agent executions into single stage indicators.
+ *
+ * Status resolution priority per canonical stage:
+ *  1. If any sub-agent has "failed"   → "failed"
+ *  2. If any sub-agent has "running"  → "running"
+ *  3. If all sub-agents are "skipped" → "skipped"
+ *  4. If all sub-agents are "completed" (or mix of completed+skipped) → "completed"
+ *  5. currentStageId match            → "running"
+ *  6. Otherwise                       → "pending"
  */
 export default function ProgressIndicator({
   steps,
   currentStageId,
 }: ProgressIndicatorProps): ReactNode {
-  // Map raw sub-agent executions into canonical ADL stages
   const displaySteps = CANONICAL_STAGES.map((canonical) => {
     const matchingEvents = steps.filter(
       (s) => s.label.toLowerCase() === canonical.id.toLowerCase()
@@ -45,7 +52,9 @@ export default function ProgressIndicator({
         status = "failed";
       } else if (matchingEvents.some((e) => e.status === "running")) {
         status = "running";
-      } else if (matchingEvents.every((e) => e.status === "completed")) {
+      } else if (matchingEvents.every((e) => e.status === "skipped")) {
+        status = "skipped";
+      } else if (matchingEvents.every((e) => e.status === "completed" || e.status === "skipped")) {
         status = "completed";
       } else {
         status = "running";
@@ -61,8 +70,11 @@ export default function ProgressIndicator({
     };
   });
 
-  const completedCount = displaySteps.filter((s) => s.status === "completed").length;
-  const progressPercent = Math.round((completedCount / displaySteps.length) * 100);
+  // Only count completed stages toward progress (skipped stages are not blocked — treat them as done)
+  const doneCount = displaySteps.filter(
+    (s) => s.status === "completed" || s.status === "skipped"
+  ).length;
+  const progressPercent = Math.round((doneCount / displaySteps.length) * 100);
 
   return (
     <div className={styles.container} role="region" aria-label="Pipeline progress">

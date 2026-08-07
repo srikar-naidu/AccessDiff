@@ -15,6 +15,7 @@ function statusVariant(status: PipelineStatus): "success" | "error" | "warning" 
   if (status === "completed") return "success";
   if (status === "failed" || status === "cancelled") return "error";
   if (status === "running") return "warning";
+  // "skipped" and "pending" → neutral
   return "neutral";
 }
 

@@ -9,6 +9,7 @@ import {
   PipelineView,
   type PipelineRun,
   type PipelineResults,
+  type PipelineStatus,
 } from "@/components/pipeline/PipelineView";
 
 import styles from "./page.module.css";
@@ -66,13 +67,16 @@ function normalizeResults(value: unknown): PipelineResults | null {
 
   const stages = arrayValue(value.stages).flatMap((stage): PipelineResults["stages"] => {
     if (!isRecord(stage) || typeof stage.id !== "string") return [];
+    const rawStatus = stringValue(stage.status, "pending");
+    const validStatuses: PipelineStatus[] = ["pending", "running", "completed", "failed", "cancelled", "skipped"];
+    const status: PipelineStatus = (validStatuses.includes(rawStatus as PipelineStatus) ? rawStatus : "pending") as PipelineStatus;
     return [{
       id: stage.id,
       stageName: stringValue(stage.stage_name),
       agentName: stringValue(stage.agent_name),
-      status: stringValue(stage.status, "pending") as PipelineRun["status"],
+      status,
       input: isRecord(stage.input) ? stage.input : null,
-      output: isRecord(stage.output) ? stage.output : null,
+      output: isRecord(stage.output_data ?? stage.output) ? (stage.output_data ?? stage.output) as Record<string, unknown> : null,
       errorMessage: stringValue(stage.error_message) || null,
       startedAt: stringValue(stage.started_at) || null,
       completedAt: stringValue(stage.completed_at) || null,

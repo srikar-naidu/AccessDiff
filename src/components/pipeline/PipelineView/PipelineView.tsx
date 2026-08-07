@@ -11,7 +11,7 @@ import styles from "./PipelineView.module.css";
 
 /* ── Shared type definitions ── */
 
-export type PipelineStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
+export type PipelineStatus = "pending" | "running" | "completed" | "failed" | "cancelled" | "skipped";
 
 export interface PipelineRun {
   id: string;
@@ -84,6 +84,7 @@ function statusVariant(status: PipelineStatus): "success" | "error" | "warning" 
   if (status === "completed") return "success";
   if (status === "failed" || status === "cancelled") return "error";
   if (status === "running") return "warning";
+  // "skipped" and "pending" both render as neutral
   return "neutral";
 }
 

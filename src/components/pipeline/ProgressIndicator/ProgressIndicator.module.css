@@ -59,6 +59,16 @@
   opacity: 0.5;
 }
 
+.stepItem.skipped {
+  border-color: var(--color-border-default);
+  background: var(--color-bg-elevated);
+  opacity: 0.6;
+}
+
+.stepItem.skipped .stepDot {
+  background: var(--color-text-tertiary);
+}
+
 .stepDot {
   width: 10px;
   height: 10px;

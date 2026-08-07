@@ -25,7 +25,7 @@ export type HelixStage = "SPEC" | "BUILD" | "EVALUATE" | "DIAGNOSE" | "OPTIMIZE"
 export interface HelixStageResult {
   stage: HelixStage;
   agentName: string;
-  status: "COMPLETED" | "FAILED";
+  status: "COMPLETED" | "FAILED" | "SKIPPED";
   confidence: number;
   reasoning: string;
   output: unknown;
@@ -127,32 +127,57 @@ export class HelixOrchestrator {
       this.record("BUILD", fixResult, stages, decisions, this.agents.fix.name);
       fixes = this.requireData(fixResult).fixes;
 
-      for (let iteration = 1; iteration <= maxIterations; iteration += 1) {
-        const verificationResult = await this.agents.verification.run({ fixes });
-        this.record("EVALUATE", verificationResult, stages, decisions, this.agents.verification.name);
-        verification = this.requireData(verificationResult);
+      // When there are no fixes at all (zero violations), skip straight to governance.
+      if (fixes.length === 0) {
+        this.skip("EVALUATE", "VerificationAgent", "No fixes to verify — skipping evaluation.", stages);
+        this.skip("DIAGNOSE", "DiagnosisAgent", "No fixes to diagnose — skipping diagnosis.", stages);
+        this.skip("OPTIMIZE", "OptimizationAgent", "No fixes to optimize — skipping optimization.", stages);
+      } else {
+        let diagnosisRan = false;
+        let optimizeRan = false;
 
-        if (verification.allVerified) {
-          break;
+        for (let iteration = 1; iteration <= maxIterations; iteration += 1) {
+          const verificationResult = await this.agents.verification.run({ fixes });
+          this.record("EVALUATE", verificationResult, stages, decisions, this.agents.verification.name);
+          verification = this.requireData(verificationResult);
+
+          if (verification.allVerified) {
+            // All fixes passed — DIAGNOSE and OPTIMIZE are not needed this run.
+            if (!diagnosisRan) {
+              this.skip("DIAGNOSE", "DiagnosisAgent", "All fixes passed verification — diagnosis not required.", stages);
+            }
+            if (!optimizeRan) {
+              this.skip("OPTIMIZE", "OptimizationAgent", "All fixes passed verification — optimization not required.", stages);
+            }
+            break;
+          }
+
+          const failedVerifications = verification.results.filter((result) => !result.verified);
+          if (failedVerifications.length === 0 || iteration === maxIterations) {
+            if (!diagnosisRan) {
+              this.skip("DIAGNOSE", "DiagnosisAgent", "No failed verifications to diagnose.", stages);
+            }
+            if (!optimizeRan) {
+              this.skip("OPTIMIZE", "OptimizationAgent", "No optimization required at this iteration.", stages);
+            }
+            break;
+          }
+
+          const diagnosisResult = await this.agents.diagnosis.run({ failedVerifications, fixes });
+          this.record("DIAGNOSE", diagnosisResult, stages, decisions, this.agents.diagnosis.name);
+          diagnosisRan = true;
+          const diagnosis: DiagnosisOutput = this.requireData(diagnosisResult);
+
+          const optimizationResult = await this.agents.optimization.run({ diagnoses: diagnosis.diagnoses, fixes });
+          this.record("OPTIMIZE", optimizationResult, stages, decisions, this.agents.optimization.name);
+          optimizeRan = true;
+          const optimization: OptimizationOutput = this.requireData(optimizationResult);
+          if (optimization.optimizedFixes.length === 0) {
+            break;
+          }
+
+          fixes = this.replaceOptimizedFixes(fixes, optimization.optimizedFixes);
         }
-
-        const failedVerifications = verification.results.filter((result) => !result.verified);
-        if (iteration === maxIterations || failedVerifications.length === 0) {
-          break;
-        }
-
-        const diagnosisResult = await this.agents.diagnosis.run({ failedVerifications, fixes });
-        this.record("DIAGNOSE", diagnosisResult, stages, decisions, this.agents.diagnosis.name);
-        const diagnosis: DiagnosisOutput = this.requireData(diagnosisResult);
-
-        const optimizationResult = await this.agents.optimization.run({ diagnoses: diagnosis.diagnoses, fixes });
-        this.record("OPTIMIZE", optimizationResult, stages, decisions, this.agents.optimization.name);
-        const optimization: OptimizationOutput = this.requireData(optimizationResult);
-        if (optimization.optimizedFixes.length === 0) {
-          break;
-        }
-
-        fixes = this.replaceOptimizedFixes(fixes, optimization.optimizedFixes);
       }
     } catch (caught: unknown) {
       error = caught instanceof Error ? caught.message : "Helix pipeline failed.";
@@ -166,7 +191,8 @@ export class HelixOrchestrator {
     const governanceRecords = governanceResult.data?.records ?? [];
 
     return {
-      completed: error === null && verification?.allVerified === true,
+      // Completed when: no error AND (all fixes verified OR there were no violations to fix)
+      completed: error === null && (verification?.allVerified === true || fixes.length === 0),
       error,
       repository,
       diff,
@@ -201,6 +227,28 @@ export class HelixOrchestrator {
       confidence: result.confidence,
       reasoning: result.reasoning,
       output: result.data,
+    });
+  }
+
+  /**
+   * Records a stage that was intentionally bypassed (e.g. DIAGNOSE/OPTIMIZE when
+   * all fixes already pass verification). This ensures the DB always has an explicit
+   * row for every canonical ADL stage so the frontend never falls back to "pending".
+   */
+  private skip(
+    stage: HelixStage,
+    agentName: string,
+    reason: string,
+    stages: HelixStageResult[]
+  ): void {
+    stages.push({
+      stage,
+      agentName,
+      status: "SKIPPED",
+      confidence: 1.0,
+      reasoning: reason,
+      output: null,
+      duration_ms: 0,
     });
   }
 

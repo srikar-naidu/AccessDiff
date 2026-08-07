@@ -22,16 +22,19 @@ export async function GET(request: Request): Promise<NextResponse> {
 
     const admin = createAdminClient();
 
-    // Query user's projects first
+    // Query user's projects first — column is github_repo, not name
     const { data: userProjects, error: projErr } = await admin
       .from("projects")
-      .select("id, name")
+      .select("id, github_repo")
       .eq("user_id", user.id);
 
     if (projErr) throw new Error(projErr.message);
 
     const projectIds = (userProjects ?? []).map((p) => p.id);
-    const projectNameMap = new Map((userProjects ?? []).map((p) => [p.id, p.name]));
+    // Use the repo slug (e.g. "owner/repo") as the display name
+    const projectNameMap = new Map(
+      (userProjects ?? []).map((p) => [p.id, p.github_repo as string])
+    );
 
     if (projectIds.length === 0) {
       return NextResponse.json({ data: { issues: [], fixes: [] }, error: null });
@@ -125,7 +128,11 @@ export async function GET(request: Request): Promise<NextResponse> {
       data: {
         issues: enrichedIssues,
         fixes: formattedFixes,
-        projects: userProjects ?? [],
+        // Normalise to { id, name } so the frontend dropdown works regardless of DB column name
+        projects: (userProjects ?? []).map((p) => ({
+          id: p.id,
+          name: p.github_repo as string,
+        })),
       },
       error: null,
     });
