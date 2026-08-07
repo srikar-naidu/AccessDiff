@@ -256,6 +256,27 @@ export default function ProjectDetailPage({
               {project.ai_summary}
             </p>
           </Card>
+
+          {/* Quick links scoped to this project */}
+          <Card padding="md">
+            <h3 className={styles.sectionTitle}>Project Reports</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push(`/issues?projectId=${id}`)}
+              >
+                View Issues for this project →
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push(`/governance?projectId=${id}`)}
+              >
+                View Governance logs for this project →
+              </Button>
+            </div>
+          </Card>
         </div>
       </div>
     </div>

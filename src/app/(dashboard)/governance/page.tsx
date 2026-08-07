@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, Input, Skeleton } from "@/components/ui";
 import { GovernanceLogCard, GovernanceTimeline } from "@/components/governance";
 import type { GovernanceRecord } from "@/components/governance";
@@ -8,14 +9,53 @@ import styles from "./page.module.css";
 
 type ViewMode = "cards" | "timeline";
 
-export default function GovernancePage() {
+interface ProjectOption {
+  id: string;
+  name: string;
+}
+
+/* ── Inner component needs useSearchParams → must be inside Suspense ── */
+function GovernanceContent() {
+  const searchParams = useSearchParams();
+  const urlProjectId = searchParams.get("projectId") ?? "all";
+
   const [records, setRecords] = useState<GovernanceRecord[]>([]);
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [agentFilter, setAgentFilter] = useState("all");
+  const [selectedProject, setSelectedProject] = useState(urlProjectId);
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
   const [selectedRecord, setSelectedRecord] = useState<GovernanceRecord | null>(null);
 
+  /* Load project list for the selector */
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const res = await fetch("/api/projects");
+        const json = await res.json();
+        const raw: unknown[] = Array.isArray(json.data) ? json.data : [];
+        setProjects(
+          raw
+            .filter((p): p is Record<string, unknown> => typeof p === "object" && p !== null)
+            .map((p) => ({
+              id: String(p.id ?? ""),
+              name: String(p.github_repo ?? p.name ?? p.id ?? "Unknown"),
+            }))
+        );
+      } catch {
+        // non-fatal — selector just won't show options
+      }
+    }
+    void loadProjects();
+  }, []);
+
+  /* Sync URL param → selector when it changes (e.g. navigating from project page) */
+  useEffect(() => {
+    setSelectedProject(urlProjectId);
+  }, [urlProjectId]);
+
+  /* Load governance records whenever filters change */
   useEffect(() => {
     async function loadRecords() {
       try {
@@ -23,6 +63,7 @@ export default function GovernancePage() {
         const params = new URLSearchParams();
         if (search) params.set("search", search);
         if (agentFilter !== "all") params.set("agent", agentFilter);
+        if (selectedProject !== "all") params.set("projectId", selectedProject);
 
         const res = await fetch(`/api/governance?${params.toString()}`);
         const json = await res.json();
@@ -37,12 +78,9 @@ export default function GovernancePage() {
       }
     }
 
-    const timer = setTimeout(() => {
-      void loadRecords();
-    }, 200);
-
+    const timer = setTimeout(() => { void loadRecords(); }, 200);
     return () => clearTimeout(timer);
-  }, [search, agentFilter]);
+  }, [search, agentFilter, selectedProject]);
 
   const uniqueAgents = [...new Set(records.map((r) => r.agentName))];
 
@@ -67,6 +105,20 @@ export default function GovernancePage() {
           />
         </div>
 
+        {/* Project selector */}
+        <select
+          className={styles.select}
+          value={selectedProject}
+          onChange={(e) => setSelectedProject(e.target.value)}
+          aria-label="Filter by project"
+        >
+          <option value="all">All Projects</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+
+        {/* Agent selector — populated from live results */}
         <select
           className={styles.select}
           value={agentFilter}
@@ -123,7 +175,7 @@ export default function GovernancePage() {
         <Card className={styles.emptyState}>
           <h3>No Governance Records</h3>
           <p>
-            {search || agentFilter !== "all"
+            {search || agentFilter !== "all" || selectedProject !== "all"
               ? "No records match your current filter criteria."
               : "Run an AccessDiff pipeline to generate AI governance audit logs."}
           </p>
@@ -159,12 +211,18 @@ export default function GovernancePage() {
               <div className={styles.metaItem}>
                 <div className={styles.metaLabel}>Confidence</div>
                 <div className={styles.metaValue}>
-                  {Math.round(selectedRecord.confidence > 1 ? selectedRecord.confidence : selectedRecord.confidence * 100)}%
+                  {Math.round(
+                    selectedRecord.confidence > 1
+                      ? selectedRecord.confidence
+                      : selectedRecord.confidence * 100
+                  )}%
                 </div>
               </div>
               <div className={styles.metaItem}>
                 <div className={styles.metaLabel}>Pipeline Run</div>
-                <div className={styles.metaValue}>{selectedRecord.pipelineRunId?.slice(0, 8) ?? "—"}</div>
+                <div className={styles.metaValue}>
+                  {selectedRecord.pipelineRunId?.slice(0, 8) ?? "—"}
+                </div>
               </div>
               <div className={styles.metaItem}>
                 <div className={styles.metaLabel}>Timestamp</div>
@@ -175,7 +233,9 @@ export default function GovernancePage() {
             </div>
 
             <div>
-              <div className={styles.metaLabel} style={{ marginBottom: "0.35rem" }}>Reasoning</div>
+              <div className={styles.metaLabel} style={{ marginBottom: "0.35rem" }}>
+                Reasoning
+              </div>
               <p style={{ margin: 0, fontSize: "0.9rem", lineHeight: 1.5, color: "var(--color-text-primary)" }}>
                 {selectedRecord.reasoning}
               </p>
@@ -183,7 +243,9 @@ export default function GovernancePage() {
 
             {selectedRecord.metadata && Object.keys(selectedRecord.metadata).length > 0 && (
               <div>
-                <div className={styles.metaLabel} style={{ marginBottom: "0.35rem" }}>Raw Metadata</div>
+                <div className={styles.metaLabel} style={{ marginBottom: "0.35rem" }}>
+                  Raw Metadata
+                </div>
                 <pre style={{
                   margin: 0,
                   padding: "0.75rem",
@@ -203,5 +265,19 @@ export default function GovernancePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function GovernancePage() {
+  return (
+    <Suspense fallback={
+      <div style={{ padding: "2rem" }}>
+        <Skeleton height={48} />
+        <Skeleton height={120} style={{ marginTop: "1rem" }} />
+        <Skeleton height={120} style={{ marginTop: "0.75rem" }} />
+      </div>
+    }>
+      <GovernanceContent />
+    </Suspense>
   );
 }

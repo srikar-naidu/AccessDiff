@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, Input, Skeleton } from "@/components/ui";
 import { IssueCard, IssueDetail } from "@/components/issues";
 import type { PipelineFix } from "@/components/pipeline";
@@ -30,7 +31,9 @@ interface ProjectOption {
   name: string;
 }
 
-export default function IssuesPage() {
+function IssuesContent() {
+  const searchParams = useSearchParams();
+  const urlProjectId = searchParams.get("projectId") ?? "all";
   const [issues, setIssues] = useState<IssueItem[]>([]);
   const [fixes, setFixes] = useState<PipelineFix[]>([]);
   const [projects, setProjects] = useState<ProjectOption[]>([]);
@@ -39,7 +42,12 @@ export default function IssuesPage() {
   // Filters
   const [search, setSearch] = useState("");
   const [selectedSeverity, setSelectedSeverity] = useState("all");
-  const [selectedProject, setSelectedProject] = useState("all");
+  const [selectedProject, setSelectedProject] = useState(urlProjectId);
+
+  // Sync URL param → selector (e.g. navigating from a project page link)
+  useEffect(() => {
+    setSelectedProject(urlProjectId);
+  }, [urlProjectId]);
 
   // Selected issue for detail modal
   const [activeIssue, setActiveIssue] = useState<IssueItem | null>(null);
@@ -171,5 +179,20 @@ export default function IssuesPage() {
         onClose={() => setActiveIssue(null)}
       />
     </div>
+  );
+}
+
+export default function IssuesPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ padding: "2rem" }}>
+        <Skeleton height={48} />
+        <Skeleton height={140} style={{ marginTop: "1rem" }} />
+        <Skeleton height={140} style={{ marginTop: "0.75rem" }} />
+        <Skeleton height={140} style={{ marginTop: "0.75rem" }} />
+      </div>
+    }>
+      <IssuesContent />
+    </Suspense>
   );
 }
