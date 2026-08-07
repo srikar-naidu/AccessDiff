@@ -1,54 +1,69 @@
 /* ═══════════════════════════════════════════════════════════════
-   AccessDiff — Design Tokens
-   All CSS custom properties for colors, spacing, shadows, radii
-   Source of truth: Design.md
+   AccessDiff — Design Tokens  ✦  PEARL SOFT GLASS PREMIUM EDITION
+   Warm pearl base, rose-gold + teal-sapphire accents,
+   bold pearlescent card borders, frosted glass surfaces.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Background Layers ── */
-  --color-bg-base:        hsl(230, 21%, 6%);     /* #0d0e14 — Deepest background */
-  --color-bg-surface:     hsl(230, 18%, 9%);     /* #131520 — Card/panel surface */
-  --color-bg-elevated:    hsl(230, 16%, 12%);    /* #1a1c28 — Elevated surface (modal, dropdown) */
-  --color-bg-hover:       hsl(230, 14%, 16%);    /* #242636 — Hover state */
-  --color-bg-active:      hsl(230, 12%, 20%);    /* #2e3040 — Active/pressed state */
+  /* ── Pearl Background Layers (soft warm light, 5-6% deltas) ── */
+  --color-bg-base:        hsl(220, 45%, 97%);    /* Pearl base — cool off-white w/ lavender cast */
+  --color-bg-surface:     hsl(220, 40%, 99%);    /* Opal card surface — +2% soft white */
+  --color-bg-elevated:    hsl(0, 0%, 100%);      /* Pure white elevated — pop modal/popover */
+  --color-bg-hover:       hsl(220, 35%, 94%);    /* Hover — -5 delta, hazy */
+  --color-bg-active:      hsl(220, 30%, 89%);    /* Active/pressed — -10 delta */
 
-  /* ── Borders ── */
-  --color-border-subtle:  hsl(230, 12%, 18%);    /* Subtle divider */
-  --color-border-default: hsl(230, 10%, 24%);    /* Default border */
-  --color-border-strong:  hsl(230, 8%, 32%);     /* Emphasized border */
+  /* ── Pearlescent Borders (BOLD DARK graphite-pearl on pearl opal base) ── */
+  --color-border-subtle:  hsl(220, 18%, 72%);    /* Hairline divider — visible pearl-graphite */
+  --color-border-default: hsl(220, 18%, 46%);    /* ★★★ DEFAULT CARD BORDER: bold dark graphite-pearl */
+  --color-border-strong:  hsl(222, 22%, 26%);    /* ★★★ STRONG: ink-dark, for hovered cards & focus ring inner */
 
-  /* ── Text ── */
-  --color-text-primary:   hsl(0, 0%, 95%);       /* #f2f2f2 — Primary text */
-  --color-text-secondary: hsl(230, 8%, 62%);     /* #979aa6 — Secondary text */
-  --color-text-tertiary:  hsl(230, 6%, 42%);     /* #65676e — Muted/disabled text */
-  --color-text-inverse:   hsl(230, 21%, 6%);     /* Dark text on light backgrounds */
+  /* ── Text (ink-black primary, high-readability contrast) ── */
+  --color-text-primary:   hsl(222, 47%, 11%);    /* Deep midnight ink — not pure black (#0f172a) */
+  --color-text-secondary: hsl(220, 15%, 38%);    /* Graphite secondary — readable */
+  --color-text-tertiary:  hsl(220, 10%, 55%);    /* Stone tertiary — labels, captions */
+  --color-text-inverse:   hsl(220, 40%, 99%);    /* White on dark (buttons, accents) */
 
-  /* ── Accent (Orange) ── */
-  --color-accent:         hsl(24, 95%, 53%);     /* #f97316 — Primary accent */
-  --color-accent-hover:   hsl(24, 95%, 60%);     /* Hover state */
-  --color-accent-muted:   hsl(24, 40%, 18%);     /* Muted background for accent elements */
-  --color-accent-text:    hsl(24, 95%, 70%);     /* Accent text on dark backgrounds */
+  /* ── Accent 1: ROSE GOLD (warm jewelry premium) ── */
+  --color-accent:         hsl(12, 76%, 58%);     /* Rose-gold — not orange, not pink */
+  --color-accent-hover:   hsl(12, 80%, 50%);     /* Deeper rose on hover */
+  --color-accent-muted:   hsl(12, 55%, 93%);     /* Pearl-rose pill background */
+  --color-accent-text:    hsl(12, 70%, 42%);     /* Rose-gold ink on light bg */
 
-  /* ── Semantic Colors ── */
-  --color-success:        hsl(142, 71%, 45%);    /* #22c55e — Pass, verified, resolved */
-  --color-success-muted:  hsl(142, 30%, 14%);
-  --color-warning:        hsl(38, 92%, 50%);     /* #eab308 — Needs attention */
-  --color-warning-muted:  hsl(38, 30%, 14%);
-  --color-error:          hsl(0, 84%, 60%);      /* #ef4444 — Critical, failed */
-  --color-error-muted:    hsl(0, 30%, 14%);
-  --color-info:           hsl(217, 91%, 60%);    /* #3b82f6 — Informational */
-  --color-info-muted:     hsl(217, 30%, 14%);
+  /* ── Accent 2: TEAL SAPPHIRE (cool counterpoint to rose-gold) ── */
+  --color-accent-2:       hsl(176, 52%, 42%);    /* Teal-sapphire — jewelry counter */
+  --color-accent-2-hover: hsl(176, 58%, 34%);
+  --color-accent-2-muted: hsl(176, 45%, 92%);
+  --color-accent-2-text:  hsl(176, 55%, 30%);
 
-  /* ── Severity Colors ── */
-  --color-severity-critical: var(--color-error);
-  --color-severity-major:    hsl(15, 85%, 55%);
-  --color-severity-minor:    var(--color-warning);
-  --color-severity-advisory: var(--color-info);
+  /* ── Semantic Colors (premium inks, no neon) ── */
+  --color-success:        hsl(148, 50%, 40%);    /* Forest jade — not meme green */
+  --color-success-muted:  hsl(148, 40%, 93%);
+  --color-warning:        hsl(38, 85%, 52%);    /* Deep amber — not fluorescent */
+  --color-warning-muted:  hsl(38, 65%, 92%);
+  --color-error:          hsl(350, 70%, 50%);    /* Crimson — not fire-engine */
+  --color-error-muted:    hsl(350, 45%, 94%);
+  --color-info:           hsl(213, 72%, 48%);    /* Cobalt — bright professional */
+  --color-info-muted:     hsl(213, 45%, 93%);
 
-  /* ── Glass Effect ── */
-  --glass-bg:             hsla(230, 18%, 9%, 0.7);
-  --glass-border:         hsla(230, 10%, 24%, 0.5);
-  --glass-blur:           12px;
+  /* ── Severity Colors (4 distinct premium hues) ── */
+  --color-severity-critical: var(--color-error);             /* Crimson */
+  --color-severity-major:    hsl(20, 80%, 52%);             /* Copper — distinct from critical */
+  --color-severity-minor:    var(--color-warning);           /* Amber */
+  --color-severity-advisory: var(--color-accent-2);          /* Teal-sapphire */
+
+  /* ── Severity Muted Backgrounds ── */
+  --color-severity-critical-muted: var(--color-error-muted);
+  --color-severity-major-muted:    hsl(20, 60%, 93%);
+  --color-severity-minor-muted:    var(--color-warning-muted);
+  --color-severity-advisory-muted: var(--color-accent-2-muted);
+
+  /* ── Frosted Pearl Glass (the aesthetic heart) ── */
+  --glass-bg:             hsla(220, 50%, 99%, 0.82);   /* Translucent pearl */
+  --glass-bg-strong:      hsla(220, 50%, 99%, 0.93);   /* Heavy glass for modals */
+  --glass-border:         hsla(220, 18%, 46%, 0.65);   /* Bold DARK graphite frame for glass */
+  --glass-border-strong:  hsla(222, 22%, 26%, 0.85);   /* Even darker for elevated glass */
+  --glass-blur:           18px;                        /* Heavy blur = frosted glass */
+  --glass-blur-strong:    28px;                        /* For sidebars/modals */
 
   /* ── Spacing Scale ── */
   --space-1:   0.25rem;   /* 4px */
@@ -65,49 +80,62 @@
   --space-24:  6rem;      /* 96px */
 
   /* ── Layout ── */
-  --sidebar-width:       260px;
-  --sidebar-collapsed:   64px;
-  --header-height:       56px;
-  --content-max-width:   1200px;
-  --content-padding:     var(--space-6);
+  --sidebar-width:       276px;      /* Slightly wider for premium feel */
+  --sidebar-collapsed:   68px;
+  --header-height:       62px;       /* Taller, more refined header */
+  --content-max-width:   1280px;     /* Wider canvas */
+  --content-padding:     var(--space-8);
 
-  /* ── Border Radius ── */
-  --radius-sm:   4px;
-  --radius-md:   8px;
-  --radius-lg:   12px;
-  --radius-xl:   16px;
-  --radius-2xl:  20px;
+  /* ── Border Radius (softer — editorial SaaS) ── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   22px;
+  --radius-2xl:  28px;
   --radius-full: 9999px;
 
-  /* ── Shadows & Elevation ── */
-  --shadow-sm:   0 1px 2px hsla(0, 0%, 0%, 0.3);
-  --shadow-md:   0 4px 6px hsla(0, 0%, 0%, 0.3),
-                 0 1px 3px hsla(0, 0%, 0%, 0.2);
-  --shadow-lg:   0 10px 15px hsla(0, 0%, 0%, 0.3),
-                 0 4px 6px hsla(0, 0%, 0%, 0.2);
-  --shadow-xl:   0 20px 25px hsla(0, 0%, 0%, 0.35),
-                 0 10px 10px hsla(0, 0%, 0%, 0.2);
-  --shadow-glow: 0 0 20px hsla(24, 95%, 53%, 0.15);
+  /* ── Shadows: two-tier (ambient occlusion + large soft) ── */
+  /* Hue-tinted 220 (pearl) — no flat black sludge */
+  --shadow-sm:   0 1px 2px hsla(220, 40%, 20%, 0.06),
+                 0 1px 1px hsla(220, 40%, 20%, 0.04);
+  --shadow-md:   0 6px 14px hsla(220, 40%, 20%, 0.09),
+                 0 2px 4px hsla(220, 40%, 20%, 0.05);
+  --shadow-lg:   0 16px 32px hsla(220, 40%, 25%, 0.11),
+                 0 4px 10px hsla(220, 40%, 20%, 0.06);
+  --shadow-xl:   0 28px 60px hsla(220, 45%, 30%, 0.14),
+                 0 8px 18px hsla(220, 40%, 25%, 0.08);
 
-  /* ── Focus Ring ── */
-  --focus-ring:  0 0 0 2px var(--color-bg-base), 0 0 0 4px var(--color-accent);
+  /* Pearl top-gloss — simulate glass highlight */
+  --shadow-gloss: inset 0 1px 0 hsla(0, 0%, 100%, 0.92);
+
+  /* Accent glow (rose-gold halo) */
+  --shadow-glow:  0 0 0 3px hsla(12, 76%, 58%, 0.12),
+                  0 8px 24px hsla(12, 76%, 58%, 0.18);
+
+  /* Accent-2 glow (teal-sapphire halo) */
+  --shadow-glow-2: 0 0 0 3px hsla(176, 52%, 42%, 0.10),
+                   0 8px 24px hsla(176, 52%, 42%, 0.16);
+
+  /* ── Focus Ring (pearl sandwich: ink border → pearl gap → rose) ── */
+  --focus-ring:  0 0 0 2px var(--color-bg-base),
+                 0 0 0 4px var(--color-accent);
 }
 
-/* ── High Contrast Mode ── */
+/* ── High Contrast Mode (preserved semantics, boosted values) ── */
 [data-theme="high-contrast"] {
-  --color-bg-base:        hsl(0, 0%, 0%);
-  --color-bg-surface:     hsl(0, 0%, 5%);
-  --color-bg-elevated:    hsl(0, 0%, 10%);
-  --color-bg-hover:       hsl(0, 0%, 15%);
-  --color-bg-active:      hsl(0, 0%, 20%);
-  --color-text-primary:   hsl(0, 0%, 100%);
-  --color-text-secondary: hsl(0, 0%, 80%);
-  --color-text-tertiary:  hsl(0, 0%, 60%);
-  --color-border-subtle:  hsl(0, 0%, 25%);
-  --color-border-default: hsl(0, 0%, 40%);
-  --color-border-strong:  hsl(0, 0%, 55%);
-  --color-accent:         hsl(24, 100%, 60%);
-  --color-accent-hover:   hsl(24, 100%, 68%);
+  --color-bg-base:        hsl(0, 0%, 100%);
+  --color-bg-surface:     hsl(0, 0%, 98%);
+  --color-bg-elevated:    hsl(0, 0%, 100%);
+  --color-bg-hover:       hsl(0, 0%, 92%);
+  --color-bg-active:      hsl(0, 0%, 84%);
+  --color-text-primary:   hsl(0, 0%, 0%);
+  --color-text-secondary: hsl(0, 0%, 20%);
+  --color-text-tertiary:  hsl(0, 0%, 40%);
+  --color-border-subtle:  hsl(0, 0%, 78%);
+  --color-border-default: hsl(0, 0%, 58%);
+  --color-border-strong:  hsl(0, 0%, 30%);
+  --color-accent:         hsl(12, 90%, 46%);
+  --color-accent-hover:   hsl(12, 95%, 38%);
 }
 
 /* ── Responsive Breakpoints (used in @media queries) ──

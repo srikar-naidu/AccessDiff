@@ -1,56 +1,59 @@
 /* ═══════════════════════════════════════════════════════════════
-   AccessDiff — Typography
-   Font loading, font stacks, and type scale
-   Source of truth: Design.md §3
+   AccessDiff — Typography   ✦  PEARL SOFT GLASS PREMIUM
+   Fraunces (display serif — editorial luxe) + Instrument Sans (distinctive body)
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Self-hosted Font Loading ──
-   Talina and Gunken can be added later as /public/fonts/ assets.
-   System fallbacks are used until those assets are available. */
+/* ── Premium self-host fallbacks via next/font/google loads
+   Fraunces & Instrument Sans are configured via next/font.
+   Tokens fall back to real premium system fonts until those load. */
 
 /* ── Font Stacks ── */
 :root {
-  /* Display — App name, hero headings */
-  --font-display: 'Talina', Georgia, 'Times New Roman', serif;
+  /* Display — App name, hero headings.
+     Fraunces = optical-sized serif, the go-to luxe SaaS display font. */
+  --font-display: var(--font-fraunces, 'Fraunces', 'Playfair Display', 'Cormorant Garamond', 'Iowan Old Style', 'Times New Roman', Georgia, serif);
 
-  /* Heading — Section headings, feature titles */
-  --font-heading: 'Gunken', 'Arial Black', sans-serif;
+  /* Heading — Section headings, feature titles (Fraunces slightly tighter opsz) */
+  --font-heading: var(--font-fraunces, 'Fraunces', 'Playfair Display', 'Cormorant Garamond', 'Iowan Old Style', 'Times New Roman', Georgia, serif);
 
-  /* Body — All body text, UI elements */
-  --font-body: var(--font-plus-jakarta), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Body — All body text, UI elements.
+     Instrument Sans = distinctive, clean, NOT generic Inter. */
+  --font-body: var(--font-instrument-sans, 'Instrument Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif);
 
-  /* Code — Code blocks, diffs, file paths */
-  --font-mono: var(--font-jetbrains), 'Fira Code', 'Consolas', 'Courier New', monospace;
+  /* Code — Code blocks, diffs, file paths. Keep JetBrains Mono. */
+  --font-mono: var(--font-jetbrains, 'JetBrains Mono', 'Fira Code', 'Consolas', 'SF Mono', 'Menlo', 'Courier New', monospace);
 }
 
-/* ── Type Scale ── */
+/* ── Type Scale (slightly refined for luxe editorial feel) ── */
 :root {
   --text-xs:    0.75rem;    /* 12px — Badges, labels */
   --text-sm:    0.875rem;   /* 14px — Secondary text, captions */
   --text-base:  1rem;       /* 16px — Body text */
   --text-lg:    1.125rem;   /* 18px — Emphasized body */
-  --text-xl:    1.25rem;    /* 20px — Card titles */
-  --text-2xl:   1.5rem;     /* 24px — Section headings */
-  --text-3xl:   1.875rem;   /* 30px — Page headings */
-  --text-4xl:   2.25rem;    /* 36px — Hero sub-heading */
-  --text-5xl:   3rem;       /* 48px — Hero heading */
-  --text-6xl:   3.75rem;    /* 60px — Landing page hero */
+  --text-xl:    1.375rem;   /* 22px — Card titles (slightly bigger for luxe) */
+  --text-2xl:   1.75rem;    /* 28px — Section headings (bigger, more air) */
+  --text-3xl:   2.25rem;    /* 36px — Page headings */
+  --text-4xl:   2.875rem;   /* 46px — Hero sub-heading */
+  --text-5xl:   3.625rem;   /* 58px — Hero heading */
+  --text-6xl:   4.5rem;     /* 72px — Landing page hero */
 
-  /* Line heights */
-  --leading-tight:   1.25;
-  --leading-normal:  1.5;
-  --leading-relaxed: 1.75;
+  /* Line heights (generous for editorial light-mode feel) */
+  --leading-tight:   1.2;
+  --leading-normal:  1.6;
+  --leading-relaxed: 1.85;
 
-  /* Letter spacing */
-  --tracking-tight:  -0.025em;
-  --tracking-normal: 0;
-  --tracking-wide:   0.025em;
+  /* Letter spacing — serif-display calibrated */
+  --tracking-tight:  -0.02em;
+  --tracking-normal: -0.005em;   /* Slight negative for modern sans body */
+  --tracking-wide:   0.04em;
 
-  /* Font weights */
+  /* Font weights (Fraunces has full optical range, we use all of it) */
   --weight-normal:   400;
   --weight-medium:   500;
   --weight-semibold: 600;
   --weight-bold:     700;
+  --weight-extrabold: 800;
+  --weight-black:    900;
 }
 
 /* ── Base Typography ── */
@@ -60,44 +63,61 @@ body {
   line-height: var(--leading-normal);
   color: var(--color-text-primary);
   letter-spacing: var(--tracking-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Headings */
+/* Headings — serif-display luxe (Fraunces vibes) */
 h1, h2, h3, h4, h5, h6 {
   line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
-  font-weight: var(--weight-semibold);
+  letter-spacing: -0.022em;
+  font-weight: var(--weight-bold);
+  /* Soft hairline drop-shadow on headings for depth in light mode */
+  text-shadow: 0 1px 0 hsla(0, 0%, 100%, 0.6);
+  color: var(--color-text-primary);
 }
 
 h1 {
   font-family: var(--font-heading);
   font-size: var(--text-4xl);
   font-weight: var(--weight-bold);
+  letter-spacing: -0.028em;
 }
 
 h2 {
   font-family: var(--font-heading);
   font-size: var(--text-3xl);
   font-weight: var(--weight-bold);
+  letter-spacing: -0.025em;
 }
 
 h3 {
   font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.018em;
 }
 
 h4 {
   font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.014em;
 }
 
 h5 {
   font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
 }
 
 h6 {
   font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.008em;
+  text-transform: uppercase;
 }
 
-/* Paragraphs */
+/* Paragraphs (editorial generous line-height in light mode) */
 p {
   color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
@@ -122,4 +142,5 @@ pre {
 /* Strong */
 strong {
   font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
 }

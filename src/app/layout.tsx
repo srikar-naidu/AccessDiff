@@ -1,12 +1,34 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Instrument_Sans, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+
+/* Premium Pearl Soft Glass typography stack:
+   Fraunces = optical-sized serif display (headings, luxe editorial)
+   Instrument_Sans = distinctive body sans (NOT generic Inter)
+   JetBrains_Mono = code
+   Plus_Jakarta_Sans retained for any existing UI usage
+*/
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
+  weight: "variable",    /* axes require weight=variable to enable full optical range */
+  axes: ["opsz"],
+  style: ["normal", "italic"],
+});
+
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument-sans",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -34,7 +56,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
+      className={`${fraunces.variable} ${instrumentSans.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
     >
       <body>
         <a href="#main-content" className="skip-to-main">

@@ -1,50 +1,71 @@
 /* ═══════════════════════════════════════════════════════════════
-   AccessDiff — Card Component
-   Variants: default, glass
+   AccessDiff — Card Component   ✦  PEARL SOFT GLASS PREMIUM
+   Frosted opal glass + BOLD pearl-silver borders + top gloss
    ═══════════════════════════════════════════════════════════════ */
 
 .card {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-sm);
+  /* Default card = frosted pearl glass (the Pearl Soft Glass signature) */
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  /* ★★★ 2px DARK BORDERS (user's explicit req) — bold graphite-pearl frames */
+  border: 2px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  /* Two-tier premium shadow + top gloss highlight */
+  box-shadow:
+    var(--shadow-md),
+    var(--shadow-gloss);
   transition:
     border-color var(--duration-normal) var(--ease-default),
     box-shadow var(--duration-normal) var(--ease-default),
-    transform var(--duration-normal) var(--ease-default);
+    transform var(--duration-normal) var(--ease-default),
+    background var(--duration-normal) var(--ease-default);
 }
 
-/* ── Interactive (hoverable) ── */
+/* ── Interactive (hoverable) — lift + glow border, DARK strong border on hover ── */
 .interactive:hover {
-  border-color: var(--color-border-default);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  border-color: var(--color-border-strong);
+  box-shadow:
+    var(--shadow-lg),
+    var(--shadow-gloss),
+    0 0 0 1px hsla(12, 76%, 58%, 0.12);
+  transform: translateY(-2px);
+}
+
+.interactive:active {
+  transform: translateY(0);
+  box-shadow:
+    var(--shadow-sm),
+    var(--shadow-gloss);
 }
 
 .interactive {
   cursor: pointer;
 }
 
-/* ── Glass Variant ── */
+/* ── Glass Variant (heavy frost for side overlays, modals) */
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-color: var(--glass-border);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur-strong));
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong));
+  /* 2px DARK borders on glass variant too */
+  border: 2px solid var(--glass-border-strong);
 }
 
 /* ── Padding Sizes ── */
 .paddingSm {
-  padding: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
 }
 
 .paddingMd {
-  padding: var(--space-5);
+  padding: var(--space-6);
 }
 
 .paddingLg {
-  padding: var(--space-8);
+  padding: var(--space-10);
+  border-radius: var(--radius-2xl);
 }
 
 .paddingNone {
@@ -57,20 +78,24 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .headerTitle {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
   color: var(--color-text-primary);
   line-height: var(--leading-tight);
+  letter-spacing: -0.014em;
 }
 
 .headerDescription {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
+  line-height: var(--leading-relaxed);
 }
 
 /* ── Card Footer ── */
@@ -79,7 +104,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-3);
-  margin-top: var(--space-4);
+  margin-top: var(--space-5);
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border-subtle);
 }

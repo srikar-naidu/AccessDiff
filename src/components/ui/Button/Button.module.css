@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
-   AccessDiff — Button Component
-   Variants: primary, secondary, ghost, danger, success
-   Sizes: sm, md, lg
+   AccessDiff — Button Component   ✦  PEARL SOFT GLASS PREMIUM
+   Premium press feedback, satin borders, rose-gold gloss
    ═══════════════════════════════════════════════════════════════ */
 
 .button {
@@ -9,28 +8,31 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  border: 1px solid transparent;
+  border: 1.5px solid transparent;
   border-radius: var(--radius-md);
   font-family: var(--font-body);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
+  letter-spacing: -0.005em;
+  /* Default satin gloss highlight */
+  box-shadow: var(--shadow-gloss);
   transition:
     background var(--duration-fast) var(--ease-default),
     border-color var(--duration-fast) var(--ease-default),
     box-shadow var(--duration-fast) var(--ease-default),
-    transform var(--duration-fast) var(--ease-default),
+    transform var(--duration-fast) var(--ease-spring),
     opacity var(--duration-fast) var(--ease-default);
 }
 
 .button:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--focus-ring), var(--shadow-gloss);
 }
 
 .button:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.975) translateY(1px);
 }
 
 .button:disabled {
@@ -60,29 +62,47 @@
 
 /* ═══════════════ VARIANTS ═══════════════ */
 
-/* Primary */
+/* Primary: Rose-gold satin (jewel-tone) */
 .primary {
-  background: var(--color-accent);
+  background: linear-gradient(180deg,
+    hsl(12, 82%, 62%),
+    hsl(12, 74%, 52%));
   color: white;
-  border-color: var(--color-accent);
+  border-color: hsla(12, 76%, 42%, 0.35);
+  box-shadow:
+    var(--shadow-gloss),
+    0 1px 0 hsla(0, 0%, 100%, 0.28) inset,
+    0 -1px 0 hsla(12, 80%, 36%, 0.6) inset,
+    0 8px 22px hsla(12, 76%, 58%, 0.20);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
-  box-shadow: var(--shadow-glow);
+  background: linear-gradient(180deg,
+    hsl(12, 86%, 58%),
+    hsl(12, 78%, 48%));
+  border-color: hsla(12, 80%, 42%, 0.5);
+  box-shadow:
+    var(--shadow-gloss),
+    0 1px 0 hsla(0, 0%, 100%, 0.3) inset,
+    0 -1px 0 hsla(12, 80%, 34%, 0.6) inset,
+    0 12px 28px hsla(12, 76%, 58%, 0.28);
 }
 
-/* Secondary */
+/* Secondary: Pearl-glass — frosted opal */
 .secondary {
-  background: var(--color-bg-elevated);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: var(--color-text-primary);
   border-color: var(--color-border-default);
 }
 
 .secondary:hover:not(:disabled) {
-  background: var(--color-bg-hover);
+  background: var(--color-bg-surface);
   border-color: var(--color-border-strong);
+  box-shadow:
+    var(--shadow-gloss),
+    var(--shadow-sm);
 }
 
 /* Ghost */
@@ -90,35 +110,64 @@
   background: transparent;
   color: var(--color-text-secondary);
   border-color: transparent;
+  box-shadow: none;
 }
 
 .ghost:hover:not(:disabled) {
   background: var(--color-bg-hover);
   color: var(--color-text-primary);
+  border-color: var(--color-border-subtle);
+  box-shadow: var(--shadow-gloss);
 }
 
-/* Danger */
+/* Danger: Crimson */
 .danger {
-  background: var(--color-error);
+  background: linear-gradient(180deg,
+    hsl(350, 75%, 56%),
+    hsl(350, 68%, 46%));
   color: white;
-  border-color: var(--color-error);
+  border-color: hsla(350, 60%, 38%, 0.35);
+  box-shadow:
+    var(--shadow-gloss),
+    0 1px 0 hsla(0, 0%, 100%, 0.22) inset,
+    0 -1px 0 hsla(350, 70%, 30%, 0.55) inset;
 }
 
 .danger:hover:not(:disabled) {
-  background: hsl(0, 84%, 55%);
-  border-color: hsl(0, 84%, 55%);
+  background: linear-gradient(180deg,
+    hsl(350, 80%, 52%),
+    hsl(350, 72%, 42%));
+  border-color: hsla(350, 65%, 40%, 0.5);
+  box-shadow:
+    var(--shadow-gloss),
+    0 1px 0 hsla(0, 0%, 100%, 0.25) inset,
+    0 -1px 0 hsla(350, 70%, 28%, 0.6) inset,
+    0 10px 24px hsla(350, 70%, 50%, 0.22);
 }
 
-/* Success */
+/* Success: Forest jade */
 .success {
-  background: var(--color-success);
+  background: linear-gradient(180deg,
+    hsl(148, 55%, 46%),
+    hsl(148, 48%, 36%));
   color: white;
-  border-color: var(--color-success);
+  border-color: hsla(148, 45%, 30%, 0.4);
+  box-shadow:
+    var(--shadow-gloss),
+    0 1px 0 hsla(0, 0%, 100%, 0.22) inset,
+    0 -1px 0 hsla(148, 50%, 24%, 0.55) inset;
 }
 
 .success:hover:not(:disabled) {
-  background: hsl(142, 71%, 40%);
-  border-color: hsl(142, 71%, 40%);
+  background: linear-gradient(180deg,
+    hsl(148, 60%, 42%),
+    hsl(148, 52%, 32%));
+  border-color: hsla(148, 48%, 32%, 0.5);
+  box-shadow:
+    var(--shadow-gloss),
+    0 1px 0 hsla(0, 0%, 100%, 0.25) inset,
+    0 -1px 0 hsla(148, 50%, 22%, 0.6) inset,
+    0 10px 24px hsla(148, 50%, 40%, 0.22);
 }
 
 /* ═══════════════ SIZES ═══════════════ */
@@ -127,22 +176,22 @@
 .sm {
   padding: var(--space-1) var(--space-3);
   font-size: var(--text-sm);
-  height: 32px;
+  height: 34px;
   border-radius: var(--radius-sm);
 }
 
 /* Medium (default) */
 .md {
-  padding: 6px var(--space-4);
+  padding: 8px var(--space-5);
   font-size: var(--text-base);
-  height: 40px;
+  height: 42px;
 }
 
 /* Large */
 .lg {
-  padding: var(--space-2) var(--space-6);
+  padding: var(--space-3) var(--space-7);
   font-size: var(--text-lg);
-  height: 48px;
+  height: 50px;
   border-radius: var(--radius-lg);
 }
 
@@ -157,13 +206,13 @@
 }
 
 .iconOnly.sm {
-  width: 32px;
+  width: 34px;
 }
 
 .iconOnly.md {
-  width: 40px;
+  width: 42px;
 }
 
 .iconOnly.lg {
-  width: 48px;
+  width: 50px;
 }
