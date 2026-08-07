@@ -1,21 +1,10 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import LandingAnimations from "./LandingAnimations";
 import JsonLdSeo from "./JsonLdSeo";
 import styles from "./page.module.css";
 
 export default async function LandingPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    redirect("/dashboard");
-  }
-
   const svgs = getIconSvgs();
 
   return (
@@ -223,95 +212,56 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* ═══════════════════ How it works ═══════════════════ */}
+        {/* ═══════════════════ Mutagent Pipeline ═══════════════════ */}
         <section id="how" className={styles.how} aria-labelledby="how-heading">
           <div className={styles.sectionLabel}>HOW IT WORKS</div>
           <h2 id="how-heading" className={styles.sectionTitle}>
-            Three steps. Zero configuration.
+            Powered by Mutagent Helix.
           </h2>
+          <p className={styles.sectionSub}>
+            Every accessibility fix runs through the full Agentic Development Lifecycle — spec, build, evaluate, diagnose, optimise, and governance.
+          </p>
 
           <ol className={styles.stepList}>
             <Step
               n={1}
-              title="Connect your GitHub repo"
-              body="OAuth in one click. AccessDiff indexes your commit history and runs an initial repository-wide risk audit using the RepositoryAgent."
+              title="SPEC — Requirements Interview"
+              body="The agentspec skill interviews the developer, captures what the a11y issue IS, and emits a validated agentspec.yaml: persona, jobs-to-be-done, context sources, tools, decision modeling, and binary eval criteria."
             />
             <Step
               n={2}
-              title="Pick a commit range and run"
-              body="Choose any two commits or open a PR. The pipeline runs axe-core on diffed lines → AI fixes → 3-round verification loop → optional approval."
+              title="BUILD — Implement Fixes"
+              body="ai-engineer implements the fix against the validated spec. ai-architect verifies the implementation. A TDD + coverage loop ensures correctness before the fix is accepted."
             />
             <Step
               n={3}
-              title="Review, approve, ship"
-              body="Low-risk fixes can be auto-approved. Everything else lands in your inbox with WCAG references, diffs, and trust scores. One click opens a GitHub PR."
+              title="EVALUATE — Judge Against Criteria"
+              body="The evaluator builds trustworthy evals from real traces, mines binary success/failure criteria, and scores the fix to a clear gate verdict. Failures never get silently shipped."
+            />
+            <Step
+              n={4}
+              title="DIAGNOSE — Root Cause Analysis"
+              body="When a fix fails evaluation, diagnostics reads real traces, pins down root causes, ranks candidate remedies, and routes the approved fix back to the builder."
+            />
+            <Step
+              n={5}
+              title="OPTIMIZE — Closed-Loop Improvement"
+              body="A bounded eval-driven optimize loop: Build → Eval → Diagnose → Optimize ↻. The loop converges before any change is applied, with one explicit apply-gate at the end."
+            />
+            <Step
+              n={6}
+              title="GOVERNANCE — Immutable Audit Trail"
+              body="Every AI decision is written to an immutable log: reasoning, confidence, agent, and action. Roll back any applied fix with one click. Full trust score and approval workflow."
             />
           </ol>
 
           <div className={styles.howCTA}>
             <Link href="/login" className={`${styles.cta} ${styles.ctaPrimary} ${styles.ctaLarge}`}>
-              Run your first audit — 60 seconds
+              See the pipeline in action
             </Link>
           </div>
         </section>
 
-        {/* ═══════════════════ Pricing ═══════════════════ */}
-        <section id="pricing" className={styles.pricing} aria-labelledby="pricing-heading">
-          <div className={styles.sectionLabel}>PRICING</div>
-          <h2 id="pricing-heading" className={styles.sectionTitle}>
-            Simple pricing. Everything a team needs.
-          </h2>
-
-          <div className={styles.pricingGrid}>
-            <PriceCard
-              name="Starter"
-              price="Free"
-              sub="For solo devs & OSS maintainers"
-              features={[
-                "3 repos",
-                "100 pipeline runs / month",
-                "Unlimited AI fixes",
-                "axe-core verification",
-                "Full governance logs",
-              ]}
-              cta="Start free"
-              ctaHref="/login"
-              featured={false}
-            />
-            <PriceCard
-              name="Pro"
-              price="$29"
-              sub="per seat / month"
-              features={[
-                "Unlimited repos",
-                "3,000 pipeline runs / month",
-                "Sarvam voice assistant (11 languages)",
-                "Priority agent queue",
-                "GitHub webhooks & CI integration",
-                "SSO (SAML) coming soon",
-              ]}
-              cta="Start 14-day trial"
-              ctaHref="/login"
-              featured
-            />
-            <PriceCard
-              name="Enterprise"
-              price="Custom"
-              sub="Security, SLAs, on-prem support"
-              features={[
-                "Everything in Pro",
-                "VPC peering & dedicated agents",
-                "99.9% uptime SLA",
-                "SOC 2 Type II",
-                "Solution architect support",
-                "Custom audit integrations",
-              ]}
-              cta="Talk to sales"
-              ctaHref="mailto:hello@accessdiff.dev"
-              featured={false}
-            />
-          </div>
-        </section>
 
         {/* ═══════════════════ FAQ ═══════════════════ */}
         <section id="faq" className={styles.faq} aria-labelledby="faq-heading">
@@ -455,59 +405,6 @@ function Step({ n, title, body }: { n: number; title: string; body: string }) {
         <p>{body}</p>
       </div>
     </li>
-  );
-}
-
-function PriceCard({
-  name,
-  price,
-  sub,
-  features,
-  cta,
-  ctaHref,
-  featured,
-}: {
-  name: string;
-  price: string;
-  sub: string;
-  features: string[];
-  cta: string;
-  ctaHref: string;
-  featured: boolean;
-}) {
-  return (
-    <article className={`${styles.priceCard} ${featured ? styles.priceFeatured : ""}`}>
-      {featured ? <div className={styles.priceRibbon}>Most popular</div> : null}
-      <h3>{name}</h3>
-      <div className={styles.priceAmount}>{price}</div>
-      <div className={styles.priceSub}>{sub}</div>
-      <ul className={styles.priceFeatures}>
-        {features.map((f) => (
-          <li key={f}>
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="hsl(148,50%,40%)"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            {f}
-          </li>
-        ))}
-      </ul>
-      <Link
-        href={ctaHref}
-        className={`${styles.cta} ${featured ? styles.ctaPrimary : styles.ctaSecondary} ${styles.ctaBlock}`}
-      >
-        {cta}
-      </Link>
-    </article>
   );
 }
 
