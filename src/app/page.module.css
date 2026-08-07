@@ -645,6 +645,57 @@
   .footerCols { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .logoStrip ul { gap: 1.2rem; font-size: 0.95rem; }
 }
+/* ═══════════════════ Inline component styles (R-022 compliance) ═══════════════════ */
+
+/* Badge component variants */
+.miniBadgeCritical {
+  background: hsl(350,70%,50%);
+  color: #fff;
+}
+.miniBadgeMajor {
+  background: hsl(20,80%,52%);
+  color: #fff;
+}
+.miniBadgeMinor {
+  background: hsl(38,85%,52%);
+  color: #fff;
+}
+.miniBadgeAdvisory {
+  background: hsl(176,52%,42%);
+  color: #fff;
+}
+.miniBadgeGreen {
+  background: hsl(148,50%,40%);
+  color: #fff;
+}
+
+/* Feature card icon rings */
+.featureIconRose {
+  background: linear-gradient(135deg, hsl(12,76%,58%), hsl(12,80%,70%));
+}
+.featureIconTeal {
+  background: linear-gradient(135deg, hsl(176,52%,42%), hsl(176,52%,60%));
+}
+
+/* Footer brand override for inline style */
+.footerBrand {
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* ═══════════════════ Responsive ═══════════════════ */
+@media (max-width: 960px) {
+  .navLinks { display: none; }
+  .heroPreview { box-shadow: 6px 6px 0 0 var(--color-border-default); }
+  .previewBody { grid-template-columns: 1fr; padding: 1rem; gap: 1rem; }
+  .featureGrid { grid-template-columns: 1fr; }
+  .pricingGrid { grid-template-columns: 1fr; }
+  .priceFeatured { transform: none; }
+  .faqGrid { grid-template-columns: 1fr; }
+  .footerInner { grid-template-columns: 1fr; }
+  .footerCols { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .logoStrip ul { gap: 1.2rem; font-size: 0.95rem; }
+}
 @media (max-width: 520px) {
   .navInner { padding: 0.8rem 1rem; }
   .hero { padding: 3rem 1rem 2.5rem; }

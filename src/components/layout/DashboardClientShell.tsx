@@ -3,6 +3,7 @@
 import React, { type ReactNode } from "react";
 import { Sidebar, Header } from "@/components/layout";
 import type { UserProfile } from "@/components/layout/Sidebar/Sidebar";
+import ErrorBoundary from "@/components/error-boundaries/ErrorBoundary";
 import styles from "@/app/(dashboard)/layout.module.css";
 
 export interface DashboardClientShellProps {
@@ -19,7 +20,9 @@ export function DashboardClientShell({
       <Sidebar user={userProfile} />
       <div className={styles.mainWrapper}>
         <Header />
-        <main className={styles.content}>{children}</main>
+        <main className={styles.content} tabIndex={-1}>
+          <ErrorBoundary name="Dashboard">{children}</ErrorBoundary>
+        </main>
       </div>
     </div>
   );

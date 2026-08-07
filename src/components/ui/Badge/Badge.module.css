@@ -157,3 +157,15 @@
   letter-spacing: 0.05em;
   font-weight: var(--weight-bold);
 }
+
+/* Outline: transparent body with ink-drawn border (neobrutalist) */
+.outline {
+  background: transparent;
+  color: var(--color-text-default);
+  border-color: var(--color-border-default);
+  border-style: dashed;
+}
+
+.outline .dot {
+  background: var(--color-accent-2);
+}

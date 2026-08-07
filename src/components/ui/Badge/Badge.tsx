@@ -10,7 +10,9 @@ export type BadgeVariant =
   | "warning"
   | "error"
   | "info"
-  | "neutral";
+  | "neutral"
+  | "accent"
+  | "outline";
 
 export type BadgeSize = "sm" | "md" | "lg";
 

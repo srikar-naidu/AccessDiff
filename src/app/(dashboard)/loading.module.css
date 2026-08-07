@@ -1,0 +1,174 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.75rem 1.75rem 3rem;
+  color: hsl(222, 47%, 11%);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.titleSkel {
+  width: 280px;
+  max-width: 100%;
+  height: 2rem;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    hsla(220, 30%, 90%, 1) 0%,
+    hsla(220, 20%, 80%, 1) 50%,
+    hsla(220, 30%, 90%, 1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.subSkel {
+  width: 480px;
+  max-width: 100%;
+  height: 1rem;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    hsla(220, 30%, 90%, 1) 0%,
+    hsla(220, 20%, 82%, 1) 50%,
+    hsla(220, 30%, 90%, 1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite 0.05s;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  background: #fff;
+  border: 3px solid hsl(220, 22%, 78%);
+  border-radius: 16px;
+  box-shadow: 6px 6px 0 0 hsl(220, 22%, 78%);
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.statLabelSkel {
+  height: 0.8rem;
+  width: 90px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    hsla(220, 30%, 90%, 1) 0%,
+    hsla(220, 20%, 82%, 1) 50%,
+    hsla(220, 30%, 90%, 1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite 0.1s;
+}
+
+.statValueSkel {
+  height: 2rem;
+  width: 140px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    hsla(12, 60%, 88%, 1) 0%,
+    hsla(176, 40%, 86%, 1) 50%,
+    hsla(12, 60%, 88%, 1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite 0.15s;
+}
+
+.statSparkSkel {
+  height: 34px;
+  width: 100%;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    hsla(220, 30%, 92%, 1) 0%,
+    hsla(220, 20%, 82%, 1) 50%,
+    hsla(220, 30%, 92%, 1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite 0.2s;
+}
+
+.panel {
+  background: #fff;
+  border: 3px solid hsl(220, 22%, 78%);
+  border-radius: 16px;
+  box-shadow: 6px 6px 0 0 hsl(12, 76%, 58%);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.panelHeadSkel {
+  height: 1.3rem;
+  width: 220px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    hsla(220, 30%, 90%, 1) 0%,
+    hsla(220, 20%, 82%, 1) 50%,
+    hsla(220, 30%, 90%, 1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.rowSkel {
+  height: 2.5rem;
+  width: 100%;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    hsla(220, 30%, 94%, 1) 0%,
+    hsla(220, 20%, 84%, 1) 50%,
+    hsla(220, 30%, 94%, 1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite 0.05s;
+}
+
+.rowSkel:nth-child(2) { animation-delay: 0.1s; }
+.rowSkel:nth-child(3) { animation-delay: 0.15s; }
+.rowSkel:nth-child(4) { animation-delay: 0.2s; }
+.rowSkel:nth-child(5) { animation-delay: 0.25s; }
+.rowSkel:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .titleSkel,
+  .subSkel,
+  .statLabelSkel,
+  .statValueSkel,
+  .statSparkSkel,
+  .panelHeadSkel,
+  .rowSkel {
+    animation: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .root { padding: 1rem 1rem 2rem; gap: 1rem; }
+}

@@ -170,6 +170,20 @@
     0 10px 24px hsla(148, 50%, 40%, 0.22);
 }
 
+/* Outline: ink-drawn border with transparent body */
+.outline {
+  background: var(--color-bg-surface);
+  color: var(--color-text-default);
+  border: 3px dashed var(--color-border-default);
+  box-shadow: 3px 3px 0 0 var(--color-border-subtle);
+}
+
+.outline:hover:not(:disabled) {
+  background: var(--color-bg-surface-hover, hsla(220, 40%, 98%, 1));
+  border-color: var(--color-accent);
+  box-shadow: 4px 4px 0 0 var(--color-accent-muted, hsla(12, 76%, 58%, 0.3));
+}
+
 /* ═══════════════ SIZES ═══════════════ */
 
 /* Small */

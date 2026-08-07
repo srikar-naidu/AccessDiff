@@ -252,7 +252,7 @@ jobs:
                 variant="outline"
                 size="sm"
                 onClick={rotateSecret}
-                loading={saving}
+                isLoading={saving}
               >
                 Rotate
               </Button>
@@ -494,6 +494,7 @@ function Field({
 }
 
 function ThresholdRow({
+  severity,
   label,
   failOn,
   tolerance,

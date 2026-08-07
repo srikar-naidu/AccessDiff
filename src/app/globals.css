@@ -9,6 +9,32 @@
 @import '../styles/animations.css';
 @import '../styles/experience.css';
 
+/* ── a11y utilities ── */
+.skip-to-main {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 1000;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  background: hsl(12, 76%, 58%);
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+  border: 3px solid hsl(222, 26%, 20%);
+  box-shadow: 3px 3px 0 0 hsl(222, 26%, 20%);
+  transition: top 180ms ease;
+}
+.skip-to-main:focus {
+  top: 1rem;
+  outline: none;
+}
+.skip-to-main:focus-visible {
+  top: 1rem;
+  outline: 3px dashed hsl(176, 52%, 42%);
+  outline-offset: 3px;
+}
+
 /* ── Pearl Mesh Gradient + Grain — The signature backdrop ── */
 html {
   height: 100%;
