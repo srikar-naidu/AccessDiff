@@ -164,6 +164,48 @@ export async function GET(
       })();
     <\/script>`;
 
+    const browserAgentBridge = `<script>
+      (function() {
+        function textOf(element) {
+          return (element.getAttribute('aria-label') || element.getAttribute('title') || element.textContent || element.getAttribute('placeholder') || '').replace(/\\s+/g, ' ').trim();
+        }
+        function interactiveElements() {
+          return Array.from(document.querySelectorAll('a[href], button, input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])')).filter(function(element) {
+            var styles = window.getComputedStyle(element);
+            return styles.display !== 'none' && styles.visibility !== 'hidden';
+          });
+        }
+        function send(requestId, text) { parent.postMessage({ type: 'accessdiff-preview-response', requestId: requestId, text: text }, '*'); }
+        function describe() {
+          var title = document.title.replace(/\\s*â€”\\s*Live Preview$/, '');
+          var headings = Array.from(document.querySelectorAll('h1, h2, h3')).map(textOf).filter(Boolean).slice(0, 5);
+          var landmarks = Array.from(document.querySelectorAll('main, nav, header, footer, [role="main"], [role="navigation"]')).map(function(element) { return element.getAttribute('aria-label') || element.tagName.toLowerCase(); });
+          return title + '. ' + (headings.length ? 'Headings: ' + headings.join(', ') + '. ' : '') + (landmarks.length ? 'Regions: ' + landmarks.join(', ') + '. ' : '') + 'There are ' + interactiveElements().length + ' interactive elements.';
+        }
+        function listControls() {
+          var items = interactiveElements().map(function(element) { return element.tagName.toLowerCase() + ': ' + (textOf(element) || 'unnamed'); }).slice(0, 20);
+          return items.length ? 'Available controls: ' + items.join('; ') + '.' : 'There are no interactive controls in this preview.';
+        }
+        function activate(target) {
+          var wanted = String(target || '').toLowerCase().trim();
+          var element = interactiveElements().find(function(candidate) {
+            var name = textOf(candidate).toLowerCase();
+            return name === wanted || name.includes(wanted) || wanted.includes(name);
+          });
+          if (!element) return 'I could not find a control named ' + target + ' in this preview.';
+          element.focus(); element.click();
+          return 'Opened ' + (textOf(element) || element.tagName.toLowerCase()) + '.';
+        }
+        window.addEventListener('message', function(event) {
+          if (event.source !== parent || !event.data || event.data.type !== 'accessdiff-preview-command') return;
+          var command = event.data;
+          if (command.action === 'describe') send(command.requestId, describe());
+          else if (command.action === 'controls') send(command.requestId, listControls());
+          else if (command.action === 'activate') send(command.requestId, activate(command.target));
+        });
+      })();
+    <\/script>`;
+
     const previewHtml = `<!doctype html>
 <html lang="en">
 <head>
@@ -181,6 +223,7 @@ export async function GET(
     pre { white-space: pre-wrap; }
   </style>
   ${focusHighlightScript}
+  ${browserAgentBridge}
 </head>
 <body>
   ${bodyContent.replace(/<script[\s\S]*?<\/script>/gi, "")}

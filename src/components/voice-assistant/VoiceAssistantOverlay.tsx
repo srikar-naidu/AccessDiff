@@ -28,6 +28,25 @@ interface ChatMessage {
   language: string;
 }
 
+function sendBrowserCommand(query: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    const requestId = crypto.randomUUID();
+    const timeout = window.setTimeout(() => {
+      window.removeEventListener("accessdiff:browser-command-response", onResponse);
+      resolve(null);
+    }, 400);
+    function onResponse(event: Event): void {
+      const detail = (event as CustomEvent<{ requestId?: string; answer?: string; handled?: boolean }>).detail;
+      if (detail?.requestId !== requestId) return;
+      window.clearTimeout(timeout);
+      window.removeEventListener("accessdiff:browser-command-response", onResponse);
+      resolve(detail.handled && detail.answer ? detail.answer : null);
+    }
+    window.addEventListener("accessdiff:browser-command-response", onResponse);
+    window.dispatchEvent(new CustomEvent("accessdiff:browser-command", { detail: { requestId, query } }));
+  });
+}
+
 export default function VoiceAssistantOverlay() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -41,6 +60,8 @@ export default function VoiceAssistantOverlay() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<unknown | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const transcriptRef = useRef("");
+  const startRecordingRef = useRef<() => void>(() => undefined);
 
   // Load chat history when opening
   useEffect(() => {
@@ -76,13 +97,18 @@ export default function VoiceAssistantOverlay() {
     };
   }, []);
 
-  // Global Alt+Space keyboard listener
+  // Alt+Space opens the assistant; Alt+Shift+V opens it and starts the mic.
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if ((event.altKey || event.ctrlKey) && (event.code === "Space" || event.key === " ")) {
         event.preventDefault();
         event.stopPropagation();
         setIsOpen((prev) => !prev);
+      }
+      if (event.altKey && event.shiftKey && event.key.toLowerCase() === "v") {
+        event.preventDefault();
+        setIsOpen(true);
+        window.setTimeout(() => startRecordingRef.current(), 0);
       }
       if (event.key === "Escape" && isOpen) {
         setIsOpen(false);
@@ -172,6 +198,14 @@ export default function VoiceAssistantOverlay() {
     setSending(true);
 
     try {
+      const browserAnswer = await sendBrowserCommand(msg);
+      if (browserAnswer) {
+        const newMsgId = crypto.randomUUID();
+        setMessages((prev) => [...prev, { id: newMsgId, role: "assistant", content: browserAnswer, language }]);
+        if (autoSpeak) void speakText(browserAnswer, newMsgId, language);
+        return;
+      }
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -234,6 +268,7 @@ export default function VoiceAssistantOverlay() {
     }
 
     try {
+      transcriptRef.current = "";
       const recognition = new (SpeechRecognitionWindow as new () => {
         continuous: boolean;
         interimResults: boolean;
@@ -255,11 +290,12 @@ export default function VoiceAssistantOverlay() {
       recognitionRef.current = recognition;
 
       recognition.onresult = (event) => {
-        let transcript = "";
+        const transcriptParts: string[] = [];
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
+          transcriptParts.push(event.results[i][0].transcript);
         }
-        setInput(transcript);
+        transcriptRef.current = transcriptParts.join("");
+        setInput(transcriptRef.current);
       };
 
       recognition.onerror = (err) => {
@@ -269,6 +305,7 @@ export default function VoiceAssistantOverlay() {
 
       recognition.onend = () => {
         setRecording(false);
+        if (transcriptRef.current.trim()) void handleSend(transcriptRef.current);
       };
 
       recognition.start();
@@ -278,6 +315,9 @@ export default function VoiceAssistantOverlay() {
       setRecording(false);
     }
   };
+  useEffect(() => {
+    startRecordingRef.current = toggleRecording;
+  }, [toggleRecording]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -354,7 +394,7 @@ export default function VoiceAssistantOverlay() {
               <span className={styles.emptyIcon}>🎙️</span>
               <span className={styles.emptyTitle}>Voice Navigation Ready</span>
               <span className={styles.emptyHint}>
-                Press Alt+Space to toggle this assistant. Use voice commands or type to navigate the live repository preview and get accessibility guidance.
+                Press Alt+Shift+V to open the microphone, or Alt+Space to open this assistant. In Live Repository Preview, ask what the page is about, list buttons, or open a file or directory.
               </span>
               <div className={styles.suggestions}>
                 <button className={styles.suggestionChip} onClick={() => void handleSend("Describe the current page elements.")}>

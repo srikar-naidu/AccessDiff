@@ -18,6 +18,7 @@
 .protanopia { filter: sepia(.35) saturate(.65) hue-rotate(310deg); }.deuteranopia { filter: sepia(.25) saturate(.5) hue-rotate(70deg); }.tritanopia { filter: sepia(.25) saturate(.7) hue-rotate(150deg); }.monochrome { filter: grayscale(1); }.keyboard { outline: 4px solid var(--color-accent); outline-offset: 4px; }
 .keyboard:focus { outline: none; }
 .screen-reader { border-width: 3px; border-color: var(--color-info); }
+.voiceHint { margin: .75rem 0 0; color: var(--color-text-tertiary); font-size: var(--text-sm); text-align: center; }
 
 @keyframes accessdiff-focus-pulse {
   0%, 100% { box-shadow: 0 0 0 6px rgba(249, 115, 22, 0.25); }

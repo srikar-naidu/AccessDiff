@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, Skeleton } from "@/components/ui";
+import { PreviewBrowserAgent } from "@/components/voice-assistant/PreviewBrowserAgent";
 import styles from "./page.module.css";
 
 type ExperienceMode = "standard" | "screen-reader" | "keyboard" | "protanopia" | "deuteranopia" | "tritanopia" | "monochrome";
@@ -141,8 +142,9 @@ export default function ExperienceModePage() {
         {previewHtml ? <iframe ref={iframeRef} title={`Preview of ${filePath}`} sandbox="allow-scripts" className={`${styles.preview} ${styles[mode]}`} srcDoc={previewHtml} /> : <Skeleton height={360} />}
       </Card>
 
-      <p style={{ color: "var(--color-text-tertiary)", fontSize: "var(--text-sm)", textAlign: "center", marginTop: "0.75rem" }}>
-        💡 Press <strong>Alt + Space</strong> anywhere on this page to open the Voice Assistant for screen reader navigation help.
+      <PreviewBrowserAgent iframe={iframeRef} files={allFiles} onOpenFile={setFilePath} />
+      <p className={styles.voiceHint}>
+        💡 Press <strong>Alt + Shift + V</strong> anywhere on this page to open the microphone for live preview navigation. Press <strong>Alt + Space</strong> to open the assistant without recording.
       </p>
 
       {(mode === "screen-reader" || mode === "keyboard") && previewHtml ? (
