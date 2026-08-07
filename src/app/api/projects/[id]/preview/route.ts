@@ -55,10 +55,8 @@ export async function GET(
     const github = new GitHubClient(dbUser.github_token);
     const branchOrRef = project.default_branch ?? "main";
 
-    // 1) Load project tree once
     const tree = await github.getFileTree(owner, repo, branchOrRef);
 
-    // 2) Resolve entry file path
     let entryPath = filePath;
     if (!entryPath) {
       const htmlFile = tree.find((item) => /\.(html|jsx|tsx|vue|svelte)$/i.test(item.path));
@@ -72,7 +70,6 @@ export async function GET(
       );
     }
 
-    // 3) Validate entryPath exists in tree before fetching content
     const entryExists = tree.some((item) => item.path === entryPath);
     if (!entryExists) {
       return NextResponse.json(
@@ -81,10 +78,8 @@ export async function GET(
       );
     }
 
-    // 4) Load entry file content
     const entryContent = await github.getFileContent(owner, repo, entryPath, branchOrRef);
 
-    // 5) Load all CSS files in the project
     const cssFiles = tree.filter((item) => item.type === "blob" && /\.css$/i.test(item.path));
     const cssPromises = cssFiles.map((cssFile) =>
       github.getFileContent(owner, repo, cssFile.path, branchOrRef).then((content) => ({
@@ -94,7 +89,6 @@ export async function GET(
     );
     const cssResults = (await Promise.all(cssPromises)).filter((item): item is { path: string; content: string } => item !== null);
 
-    // 6) Build combined preview document
     const cssBlocks = cssResults.map((css) => `/* === ${css.path} === */\n${css.content}`).join("\n\n");
     const escapedCss = cssBlocks.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -106,6 +100,69 @@ export async function GET(
           .replace(/\{[^}]*\}/g, "preview-value")
           .replace(/\son[A-Z][A-Za-z]*=(?:\"[^\"]*\"|'[^']*'|\{[^}]*\})/g, "")
       : `<pre>${entryContent.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] ?? c)}</pre>`;
+
+    const focusHighlightScript = `<script>
+      (function() {
+        var style = document.createElement('style');
+        style.textContent = '.accessdiff-focus-ring { outline: 3px solid #f97316 !important; outline-offset: 2px !important; box-shadow: 0 0 0 6px rgba(249, 115, 22, 0.25) !important; border-radius: 4px !important; } .accessdiff-focus-info { position: fixed; bottom: 12px; left: 12px; background: rgba(0,0,0,0.85); color: #fff; padding: 6px 12px; border-radius: 6px; font: 12px system-ui; z-index: 99999; pointer-events: none; } .accessdiff-number-badge { position: absolute; top: -10px; left: -10px; background: #f97316; color: #fff; width: 20px; height: 20px; border-radius: 50%; font: bold 11px system-ui; display: flex; align-items: center; justify-content: center; z-index: 99998; pointer-events: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }';
+        document.head.appendChild(style);
+        var info = document.createElement('div');
+        info.className = 'accessdiff-focus-info';
+        document.body.appendChild(info);
+        var focusables = [];
+        function updateFocusables() {
+          focusables = Array.from(document.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex=\\'-1\\'])')).filter(function(el) {
+            var cs = window.getComputedStyle(el);
+            return cs.display !== 'none' && cs.visibility !== 'hidden';
+          });
+          focusables.forEach(function(el, idx) {
+            el.classList.remove('accessdiff-focus-ring');
+            var existing = el.querySelector('.accessdiff-number-badge');
+            if (existing) existing.remove();
+            if (idx < 9) {
+              var badge = document.createElement('span');
+              badge.className = 'accessdiff-number-badge';
+              badge.textContent = idx + 1;
+              el.style.position = el.style.position || 'relative';
+              el.appendChild(badge);
+            }
+          });
+        }
+        setTimeout(updateFocusables, 300);
+        document.addEventListener('focusin', function(e) {
+          document.querySelectorAll('.accessdiff-focus-ring').forEach(function(el) { el.classList.remove('accessdiff-focus-ring'); });
+          if (e.target && e.target.nodeType === 1) { e.target.classList.add('accessdiff-focus-ring'); }
+          var tag = e.target.tagName.toLowerCase();
+          var role = e.target.getAttribute('role') || '';
+          var label = '';
+          if (e.target.tagName === 'A') label = e.target.textContent.trim() || e.target.getAttribute('aria-label') || '';
+          else if (e.target.tagName === 'BUTTON') label = e.target.textContent.trim() || e.target.getAttribute('aria-label') || '';
+          else if (e.target.tagName === 'INPUT') label = e.target.getAttribute('aria-label') || e.target.getAttribute('placeholder') || '';
+          else if (e.target.tagName === 'SELECT') label = e.target.getAttribute('aria-label') || '';
+          else if (e.target.tagName === 'TEXTAREA') label = e.target.getAttribute('aria-label') || e.target.getAttribute('placeholder') || '';
+          else label = e.target.getAttribute('aria-label') || e.target.textContent.trim() || '';
+          info.textContent = (label ? '[' + tag + '] ' + label : tag + (role ? ' role="' + role + '"' : ''));
+        });
+        document.addEventListener('focusout', function() {
+          document.querySelectorAll('.accessdiff-focus-ring').forEach(function(el) { el.classList.remove('accessdiff-focus-ring'); });
+          info.textContent = '';
+        });
+        document.addEventListener('keydown', function(e) {
+          if (e.altKey || e.ctrlKey || e.metaKey) return;
+          var num = parseInt(e.key, 10);
+          if (num >= 1 && num <= 9) {
+            e.preventDefault();
+            e.stopPropagation();
+            updateFocusables();
+            if (num <= focusables.length) {
+              focusables[num - 1].focus();
+            }
+          }
+        });
+        var observer = new MutationObserver(updateFocusables);
+        observer.observe(document.body, { childList: true, subtree: true });
+      })();
+    <\/script>`;
 
     const previewHtml = `<!doctype html>
 <html lang="en">
@@ -123,6 +180,7 @@ export async function GET(
     img { max-width: 100%; height: auto; }
     pre { white-space: pre-wrap; }
   </style>
+  ${focusHighlightScript}
 </head>
 <body>
   ${bodyContent.replace(/<script[\s\S]*?<\/script>/gi, "")}
