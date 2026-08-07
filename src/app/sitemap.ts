@@ -48,12 +48,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${base}/assistant`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
       url: `${base}/experience`,
       lastModified: now,
       changeFrequency: "monthly",

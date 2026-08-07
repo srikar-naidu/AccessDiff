@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Instrument_Sans, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import VoiceAssistantOverlay from "@/components/voice-assistant/VoiceAssistantOverlay";
 import "./globals.css";
 
 /* Premium Pearl Soft Glass typography stack:
@@ -119,6 +120,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to main content
         </a>
         <main id="main-content">{children}</main>
+        <VoiceAssistantOverlay />
       </body>
     </html>
   );

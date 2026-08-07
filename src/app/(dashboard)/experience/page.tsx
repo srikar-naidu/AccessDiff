@@ -23,10 +23,12 @@ export default function ExperienceModePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectId, setProjectId] = useState("");
   const [filePath, setFilePath] = useState("");
-  const [files, setFiles] = useState<RepositoryFile[]>([]);
-  const [source, setSource] = useState("");
+  const [allFiles, setAllFiles] = useState<RepositoryFile[]>([]);
+  const [previewHtml, setPreviewHtml] = useState("");
   const [mode, setMode] = useState<ExperienceMode>("standard");
   const [error, setError] = useState<string | null>(null);
+
+  const previewableFiles = useMemo(() => allFiles.filter((f) => /\.(html|jsx|tsx|vue|svelte)$/i.test(f.path)), [allFiles]);
 
   useEffect(() => {
     void fetch("/api/projects").then(async (response) => {
@@ -44,27 +46,39 @@ export default function ExperienceModePage() {
     void fetch(`/api/projects/${projectId}/files`).then(async (response) => {
       const payload: unknown = await response.json();
       const fileList = isRecord(payload) && isRecord(payload.data) && Array.isArray(payload.data.files) ? payload.data.files : [];
-      const uiFiles = fileList.flatMap((item): RepositoryFile[] => isFile(item) && /\.(html|jsx|tsx|vue|svelte)$/i.test(item.path) ? [item] : []);
-      setFiles(uiFiles);
-      if (uiFiles[0]) setFilePath(uiFiles[0].path);
-      else setError("This imported repository has no supported UI file to preview.");
+      const parsed = fileList.flatMap((item): RepositoryFile[] => isFile(item) ? [item] : []);
+      setAllFiles(parsed);
+      const htmlFiles = parsed.filter((f) => /\.(html|jsx|tsx|vue|svelte)$/i.test(f.path));
+      if (htmlFiles[0]) setFilePath(htmlFiles[0].path);
+      else if (parsed[0]) setFilePath(parsed[0].path);
+      else setFilePath("");
     }).catch(() => setError("Unable to load repository files."));
   }, [projectId]);
 
   useEffect(() => {
+    if (!projectId) return;
+    setPreviewHtml("");
+    setError(null);
+  }, [projectId]);
+
+  useEffect(() => {
     if (!projectId || !filePath) return;
-    void fetch(`/api/projects/${projectId}/files/content?path=${encodeURIComponent(filePath)}`).then(async (response) => {
-      const payload: unknown = await response.json();
-      if (!response.ok || !isRecord(payload) || !isRecord(payload.data) || typeof payload.data.content !== "string") {
-        throw new Error("Unable to load the selected repository file.");
+    void fetch(`/api/projects/${projectId}/preview?path=${encodeURIComponent(filePath)}`, { cache: "no-store" }).then(async (response) => {
+      if (!response.ok) {
+        const payload: unknown = await response.json();
+        const message = isRecord(payload) && isRecord(payload.error) && typeof payload.error.message === "string"
+          ? payload.error.message
+          : "Unable to load repository preview.";
+        throw new Error(message);
       }
+      const html = await response.text();
+      setPreviewHtml(html);
       setError(null);
-      setSource(payload.data.content);
     }).catch((caught: unknown) => setError(caught instanceof Error ? caught.message : "Unable to load repository preview."));
   }, [filePath, projectId]);
 
   const selectedProject = projects.find((project) => project.id === projectId);
-  const summary = useMemo(() => summarizeSource(source), [source]);
+  const summary = useMemo(() => summarizeSource(previewHtml), [previewHtml]);
 
   return (
     <div className={styles.container}>
@@ -80,15 +94,15 @@ export default function ExperienceModePage() {
 
       <Card className={styles.controls}>
         <label>Imported repository
-          <select value={projectId} onChange={(event) => { setSource(""); setFilePath(""); setProjectId(event.target.value); }}>
+          <select value={projectId} onChange={(event) => { setPreviewHtml(""); setFilePath(""); setProjectId(event.target.value); }}>
             <option value="">Select a repository</option>
             {projects.map((project) => <option key={project.id} value={project.id}>{project.name} — {project.github_repo}</option>)}
           </select>
         </label>
         <label>Preview file
-          <select value={filePath} onChange={(event) => setFilePath(event.target.value)} disabled={!files.length}>
-            <option value="">Select a UI file</option>
-            {files.map((file) => <option key={file.path} value={file.path}>{file.path}</option>)}
+          <select value={filePath} onChange={(event) => setFilePath(event.target.value)} disabled={!previewableFiles.length}>
+            <option value="">Select a file</option>
+            {previewableFiles.map((file) => <option key={file.path} value={file.path}>{file.path} ({file.type})</option>)}
           </select>
         </label>
       </Card>
@@ -99,29 +113,23 @@ export default function ExperienceModePage() {
 
       <Card className={styles.previewCard}>
         <div className={styles.previewHeader}><div><p className={styles.eyebrow}>Live repository preview</p><h2>{selectedProject?.github_repo ?? "Select an imported repository"}</h2><span>{filePath || "No file selected"}</span></div><span className={styles.modeBadge}>{MODES.find((item) => item.id === mode)?.name}</span></div>
-        {source ? <iframe title={`Preview of ${filePath}`} sandbox="" className={`${styles.preview} ${styles[mode]}`} srcDoc={toPreviewDocument(source)} /> : <Skeleton height={360} />}
+        {previewHtml ? <iframe title={`Preview of ${filePath}`} sandbox="" className={`${styles.preview} ${styles[mode]}`} srcDoc={previewHtml} /> : <Skeleton height={360} />}
       </Card>
 
-      {(mode === "screen-reader" || mode === "keyboard") && source ? <Card className={styles.assistCard}><h2>{mode === "screen-reader" ? "Screen reader transcript" : "Keyboard tab order"}</h2><p>{mode === "screen-reader" ? summary.announcements : summary.tabStops}</p></Card> : null}
+      <p style={{ color: "var(--color-text-tertiary)", fontSize: "var(--text-sm)", textAlign: "center", marginTop: "0.75rem" }}>
+        💡 Press <strong>Alt + Space</strong> anywhere on this page to open the Voice Assistant for screen reader navigation help.
+      </p>
+
+      {(mode === "screen-reader" || mode === "keyboard") && previewHtml ? <Card className={styles.assistCard}><h2>{mode === "screen-reader" ? "Screen reader transcript" : "Keyboard tab order"}</h2><p>{mode === "screen-reader" ? summary.announcements : summary.tabStops}</p></Card> : null}
     </div>
   );
 }
 
-function toPreviewDocument(source: string): string {
-  const markup = source.includes("<") ? source
-    .replace(/import[^;]+;?/g, "")
-    .replace(/className=/g, "class=")
-    .replace(/\{[^}]*\}/g, "preview-value")
-    .replace(/\son[A-Z][A-Za-z]*=(?:\"[^\"]*\"|'[^']*'|\{[^}]*\})/g, "")
-    : `<pre>${escapeHtml(source)}</pre>`;
-  return `<!doctype html><html><head><style>body{font:16px system-ui;padding:24px;color:#151515;background:#fff}button,input,a,select,textarea{margin:6px;padding:8px}img{max-width:100%;height:auto}pre{white-space:pre-wrap}</style></head><body>${markup.replace(/<script[\s\S]*?<\/script>/gi, "")}</body></html>`;
-}
-
-function summarizeSource(source: string) {
-  const buttons = (source.match(/<button\b/gi) ?? []).length;
-  const inputs = (source.match(/<(input|select|textarea)\b/gi) ?? []).length;
-  const links = (source.match(/<a\b/gi) ?? []).length;
-  const images = (source.match(/<img\b/gi) ?? []).length;
+function summarizeSource(html: string) {
+  const buttons = (html.match(/<button\b/gi) ?? []).length;
+  const inputs = (html.match(/<(input|select|textarea)\b/gi) ?? []).length;
+  const links = (html.match(/<a\b/gi) ?? []).length;
+  const images = (html.match(/<img\b/gi) ?? []).length;
   return { announcements: `Repository preview contains ${buttons} buttons, ${inputs} form controls, ${links} links, and ${images} images.`, tabStops: `Estimated tab order: ${links + buttons + inputs} interactive elements in the selected imported file.` };
 }
 

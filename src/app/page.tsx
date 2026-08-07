@@ -183,8 +183,8 @@ export default async function LandingPage() {
             />
             <FeatureCard
               icon={svgs.voice}
-              title="Sarvam AI Assistant"
-              body="Ask questions about regressions in 11 Indian languages via STT / TTS. The assistant has full context on your project, issues, and scores."
+              title="Voice Assistant for Screen Readers"
+              body="A global voice-controlled agent accessible via Alt+Space. It helps blind users navigate the live repository preview through screen readers with voice commands and accessibility guidance."
               accent="rose"
             />
             <FeatureCard
